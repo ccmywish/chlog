@@ -1,3 +1,3 @@
 # chlog
 
-Easily maintain the changelog on the cli.
+Easily maintain Changelog on the cli.

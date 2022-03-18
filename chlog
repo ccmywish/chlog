@@ -29,7 +29,7 @@ $chlog_template = <<EOT
 
 <hr>
 
-This Changelog is maintained with [chlog](#)
+This Changelog is maintained with [chlog](https://github.com/ccmywish/chlog)
 
 EOT
 

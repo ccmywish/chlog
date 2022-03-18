@@ -1,0 +1,233 @@
+#!/usr/bin/env ruby
+# ------------------------------------------------------
+# File          : chlog.rb
+# Authors       : ccmywish <ccmywish@qq.com>
+# Created on    : <2022-03-18>
+# Last modified : <2022-03-18>
+#
+# chlog:
+#
+#   Maintain your project's changelog
+#
+# ------------------------------------------------------
+
+require 'date'
+$today = Date.today.to_s
+
+$unreleased_title = "## [Unreleased](#) (#$today)"
+
+$chlog_template = <<EOT
+# Changelog
+
+#$unreleased_title
+
+<br>
+
+## [Initialize](#) (#$today)
+
+<br>
+
+<hr>
+
+This Changelog is maintained with [chlog](#)
+
+EOT
+
+def get_changelog
+  file = "CHANGELOG.md"
+  if File.exists? file
+    return File.read file
+  else
+    puts "chlog: Auto generate CHANGELOG.md"
+    File.write(file, $chlog_template)
+    return File.read file
+  end
+end
+
+def help
+  puts <<EOH
+chlog: maintain projects changelog
+
+usage:
+  chlog         => generate CHANGELOG.md or copy git log
+  chlog log     => add log to Enhancements by default
+  chlog e log   => add log to Enhancements
+  chlog b log   => add log to Bug fix
+  chlog d log   => add log to Deprecations
+  chlog r 3.14  => release version to 3.14
+
+EOH
+
+end
+
+def match_unreleased?(str)
+  str =~ /^## \[Unreleased\]\(.*\) \(\d{4}-\d\d-\d\d\)/
+end
+
+def match_enhancements?(str)
+  str =~ /^\*\*Enhancements:\*\*/
+end
+
+def match_bugfix?(str)
+  str =~ /^\*\*Bug fix:\*\*/
+end
+
+def match_deprecated?(str)
+  str =~ /^\*\*Deprecated:\*\*/
+end
+
+
+def add_to_enhancements(log)
+  puts log
+  content = get_changelog
+  lns = content.lines
+
+  unless match_unreleased? lns[2]
+    to_wr = $unreleased_title + "\n\n"
+    to_wr += "**Enhancements:**\n\n" + '- ' + log + "\n\n<br>\n\n"
+
+    File.write("CHANGELOG.md", "# Changelog\n\n" + to_wr + lns[2..].join)
+  else
+    if match_enhancements? lns[4]
+      # Enhancements exist
+      to_wr = lns[0..5].join + '- ' + log + "\n"
+      File.write("CHANGELOG.md", to_wr + lns[6..].join)
+    else
+      puts "chlog: Add 'Enhancements' category"
+      to_wr = lns[0..3].join + "**Enhancements:**\n\n" + '- ' + log + "\n"
+      File.write("CHANGELOG.md", to_wr + lns[3..].join)
+    end
+  end
+
+  puts "chlog: Add to enhancements"
+end
+
+
+
+def add_to_bugfix(log)
+
+  content = get_changelog
+  lns = content.lines
+
+  unless match_unreleased? lns[2]
+    to_wr = $unreleased_title + "\n\n"
+    to_wr += "**Bug fix:**\n\n" + '- ' + log + "\n\n<br>\n\n"
+
+    File.write("CHANGELOG.md", "# Changelog\n\n" + to_wr + lns[2..].join)
+  else
+    # next index
+    ni = lns[3..].each_with_index {break _2 if _1.start_with?("## [") }
+    ni += 3
+
+    bug_i = lns[3..ni].each_with_index { break _2 if match_bugfix?(_1) }
+
+    # The not match return value is not nil!! But an array!!
+    if bug_i.class != Integer
+      puts "chlog: Add 'Bug fix' category"
+      to_wr = lns[0..(ni-3)].join + "**Bug fix:**\n\n" + '- ' + log + "\n"
+      File.write("CHANGELOG.md", to_wr + lns[(ni-3)..].join)
+    else
+      bug_i += 3
+      # Buf fix exists
+      to_wr = lns[0..bug_i+1].join + '- ' + log + "\n"
+      File.write("CHANGELOG.md", to_wr + lns[bug_i+2..].join)
+    end
+
+  end
+
+  puts "chlog: Add to bug fix"
+end
+
+
+
+def add_to_deprecations(log)
+
+  content = get_changelog
+  lns = content.lines
+
+  unless match_unreleased? lns[2]
+    to_wr = $unreleased_title + "\n\n"
+    to_wr += "**Deprecated:**\n\n" + '- ' + log + "\n\n<br>\n\n"
+
+    File.write("CHANGELOG.md", "# Changelog\n\n" + to_wr + lns[2..].join)
+  else
+    # next index
+    ni = lns[3..].each_with_index {break _2 if _1.start_with?("## [") }
+    ni += 3
+
+    bug_i = lns[3..ni].each_with_index { break _2 if match_deprecated?(_1) }
+
+    # The not match return value is not nil!! But an array!!
+    if bug_i.class != Integer
+      puts "chlog: Add 'Deprecated' category"
+      to_wr = lns[0..(ni-3)].join + "**Deprecated:**\n\n" + '- ' + log + "\n"
+      File.write("CHANGELOG.md", to_wr + lns[(ni-3)..].join)
+    else
+      bug_i += 3
+      # Buf fix exists
+      to_wr = lns[0..bug_i+1].join + '- ' + log + "\n"
+      File.write("CHANGELOG.md", to_wr + lns[bug_i+2..].join)
+    end
+
+  end
+
+  puts "chlog: Add to deprecations"
+end
+
+
+
+def release_new_version(ver)
+  content = get_changelog
+  lns = content.lines
+  puts lns[2]
+  unless match_unreleased? lns[2]
+    puts "chlog: Already released #{lns[1][1..]}"
+  else
+    to_wr = "## [#{ver}](#) (#$today)\n"
+    new_cont = "# Changelog\n\n"
+    new_cont += to_wr + lns[3..].join('')
+    File.write("CHANGELOG.md", new_cont)
+    puts "Release #{ver} in changelog!"
+  end
+end
+
+
+
+#############
+#    main
+#############
+
+if $*.size == 0
+  if File.exists? "CHANGELOG.md"
+    get_changelog
+    gitlog = `git log --oneline -n 1`
+    log = gitlog.split(' ')
+    log = log[1..].join(' ')
+
+    case log
+    when /feature/i, /support/i, /add/i then add_to_enhancements(log)
+    when /fix/i, /repair/i, /bug/i, /problem/i, /issue/i then add_to_bugfix(log)
+    when /deprecat/i, /remove/i         then add_to_deprecations(log)
+    else
+      add_to_enhancements(log)
+    end
+
+  else
+    get_changelog
+  end
+  exit
+end
+
+action = $*[0]
+log = $*[1..].join(' ')
+
+case action
+when ?h, "-h" then help()
+when ?e, "-e" then add_to_enhancements(log)
+when ?b, "-b" then add_to_bugfix(log)
+when ?d, "-d" then add_to_deprecations(log)
+when ?r, "-r" then release_new_version($*[1])
+else
+  add_to_enhancements $*[0..].join(' ')
+end
+

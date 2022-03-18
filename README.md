@@ -2,11 +2,13 @@
 
 # chlog
 
-Easily maintain Changelog on the cli.
+[![Gem Version](https://badge.fury.io/rb/chlog.svg)](https://rubygems.org/gems/chlog) 
 
 ```bash
 gem install chlog
 ```
+
+Easily maintain Changelog on the cli.
 
 <br>
 

@@ -3,7 +3,7 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-03-18>
+# Last modified : <2022-03-19>
 #
 # chlog:
 #
@@ -11,7 +11,7 @@
 #
 # ------------------------------------------------------
 
-CHLOG_VERSION = "1.0"
+CHLOG_VERSION = "1.1"
 
 require 'date'
 $today = Date.today.to_s
@@ -52,12 +52,12 @@ chlog (v#{CHLOG_VERSION}): Help maintain Changelog of your projects
 
 usage:
 
-  chlog          => generate CHANGELOG.md or copy git log
-  chlog log      => add log to Enhancements by default
-  chlog -e log   => add log to Enhancements
-  chlog -b log   => add log to Bug fix
-  chlog -d log   => add log to Deprecations
-  chlog -r 3.14  => release version to 3.14
+  chlog          => Generate CHANGELOG.md or copy git log
+  chlog log      => Add log according to case or to Enhancements by default
+  chlog -e log   => Add log to Enhancements
+  chlog -b log   => Add log to Bug fix
+  chlog -d log   => Add log to Deprecations
+  chlog -r v3.14 => Release version to v3.14
 
 EOH
 
@@ -81,7 +81,7 @@ end
 
 
 def add_to_enhancements(log)
-  puts log
+
   content = get_changelog
   lns = content.lines
 
@@ -102,7 +102,7 @@ def add_to_enhancements(log)
     end
   end
 
-  puts "chlog: Add to enhancements"
+  puts "chlog: Add to Enhancements"
 end
 
 
@@ -138,7 +138,7 @@ def add_to_bugfix(log)
 
   end
 
-  puts "chlog: Add to bug fix"
+  puts "chlog: Add to Bug fix"
 end
 
 
@@ -174,7 +174,7 @@ def add_to_deprecations(log)
 
   end
 
-  puts "chlog: Add to deprecations"
+  puts "chlog: Add to Deprecations"
 end
 
 
@@ -182,7 +182,7 @@ end
 def release_new_version(ver)
   content = get_changelog
   lns = content.lines
-  puts lns[2]
+  # puts lns[2]
   unless match_unreleased? lns[2]
     puts "chlog: Already released #{lns[1][1..]}"
   else
@@ -195,6 +195,19 @@ def release_new_version(ver)
 end
 
 
+def add_log_sensitive(log)
+
+  # Be careful the when statements order
+  # Match the case you want first
+  case log
+  when /deprecat/i, /remove/i, /^not/i                 then add_to_deprecations(log)
+  when /feature/i, /support/i, /add/i, /update/i       then add_to_enhancements(log)
+  when /fix/i, /repair/i, /bug/i, /problem/i, /issue/i then add_to_bugfix(log)
+  else
+    add_to_enhancements(log)
+  end
+end
+
 
 #############
 #    main
@@ -206,15 +219,7 @@ if $*.size == 0
     gitlog = `git log --oneline -n 1`
     log = gitlog.split(' ')
     log = log[1..].join(' ')
-
-    case log
-    when /feature/i, /support/i, /add/i, /update/i       then add_to_enhancements(log)
-    when /fix/i, /repair/i, /bug/i, /problem/i, /issue/i then add_to_bugfix(log)
-    when /deprecat/i, /remove/i         then add_to_deprecations(log)
-    else
-      add_to_enhancements(log)
-    end
-
+    add_log_sensitive(log)
   else
     get_changelog
   end
@@ -231,6 +236,6 @@ when ?b, "-b" then add_to_bugfix(log)
 when ?d, "-d" then add_to_deprecations(log)
 when ?r, "-r" then release_new_version($*[1])
 else
-  add_to_enhancements $*[0..].join(' ')
+  add_log_sensitive $*[0..].join(' ')
 end
 

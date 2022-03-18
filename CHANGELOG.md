@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.1](#) (2022-03-19)
+
+**Enhancements:**
+
+- Not output debug info
+
+**Deprecated:**
+
+- Not add to Enhancements by default, but according to log's info
+
+<br>
+
 ## [v1.0](#) (2022-03-18)
 
 **Enhancements:**
@@ -14,7 +26,7 @@
 
   I write this program because I don't like the existing project [github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator). The code can't always be associated with Github, and issues links are really messy and not necessary if the project had failed and gone nowhere, but the code may still existed in someone's dir. 
   
-  So leave the important change logs here in this file with code is good.
+  So leaving the important change logs here in this file with code is good.
 
 <br>
 

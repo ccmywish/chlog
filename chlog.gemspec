@@ -1,12 +1,12 @@
 Gem::Specification.new do |s|
   s.name = "chlog"
-  s.version = "1.0"
-  s.date = "2022-03-18"
+  s.version = "1.1"
+  s.date = "2022-03-19"
   
   s.summary = "chlog: help maintain Changelog"
 
   s.description = <<DESC
-This command line tool `chlog` is used to help you generate and maintain the changelog of your project.
+This command line tool `chlog` helps generate and maintain the Changelog of your projects.
 DESC
 
   s.license = "MIT"

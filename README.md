@@ -15,26 +15,28 @@ gem install chlog
 
 ## Usage
 
+You can always manually add more info to your Changelog, as `chlog` is only a helper. see [CHANGELOG.md](./CHANGELOG.md) for example.
+
 ```bash
 $ chlog
-# generate CHANGELOG.md 
+# Generate CHANGELOG.md 
 #   or 
-# add the latest git log to Changelog
+# Add the latest git log to Changelog
 
 $ chlog log
-# -> add log to Enhancements by default
+# -> Add log according to case or to Enhancements by default
 
 $ chlog -e log
-# -> add log to Enhancements
+# -> Add log to Enhancements
 
 $ chlog -b log
-# -> add log to Bug fix
+# -> Add log to Bug fix
 
 $ chlog -d log
-# -> add log to Deprecations
+# -> Add log to Deprecations
 
 $ chlog -r version
-# -> release to version
+# -> Release to version
 ```
 
 <br>

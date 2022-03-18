@@ -205,7 +205,7 @@ if $*.size == 0
     log = log[1..].join(' ')
 
     case log
-    when /feature/i, /support/i, /add/i then add_to_enhancements(log)
+    when /feature/i, /support/i, /add/i, /update/i       then add_to_enhancements(log)
     when /fix/i, /repair/i, /bug/i, /problem/i, /issue/i then add_to_bugfix(log)
     when /deprecat/i, /remove/i         then add_to_deprecations(log)
     else

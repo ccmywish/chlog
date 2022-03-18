@@ -52,12 +52,12 @@ chlog (v#{CHLOG_VERSION}): Help maintain Changelog of your projects
 
 usage:
 
-  chlog         => generate CHANGELOG.md or copy git log
-  chlog log     => add log to Enhancements by default
-  chlog e log   => add log to Enhancements
-  chlog b log   => add log to Bug fix
-  chlog d log   => add log to Deprecations
-  chlog r 3.14  => release version to 3.14
+  chlog          => generate CHANGELOG.md or copy git log
+  chlog log      => add log to Enhancements by default
+  chlog -e log   => add log to Enhancements
+  chlog -b log   => add log to Bug fix
+  chlog -d log   => add log to Deprecations
+  chlog -r 3.14  => release version to 3.14
 
 EOH
 

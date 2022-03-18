@@ -4,6 +4,7 @@
 
 **Enhancements:**
 
+- add gemspec
 - add license
 - add changelog using self
 

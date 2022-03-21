@@ -2,14 +2,20 @@
 
 ## [Unreleased](#) (2022-03-21)
 
+### New features:
+
+- Force maintain the main categories order
+- Add 'Security', 'Compatibility' category
+- Add 'New features' category
+
+### Enhancements:
+
+- Add good documents for possible future contributors
+
 ### Deprecations:
 
 - Use `###` rather than `**` for main category
 - Use 'Deprecations' rather than 'Deprecated'
-
-### New features:
-
-- Add 'New features'
 
 <br>
 

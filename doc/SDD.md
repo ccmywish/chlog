@@ -119,20 +119,16 @@ Let's see the order, again
 5. Compatibility
 6. Deprecations
 
-If we implement 'Enhancements', we should keep it after 'New features' and before 'Bug fixes'. But to locate the new log, the `after` category is not useful at all, we only can rely on the `before` category. But what if the `before` category not exists?
 
-```ruby
+The algorithm deployed in our program is to make `add_to_a_category` into three parts:
+1. The first order function: `add_to_new_features`
+  It only cares about the `Unreleased version`'s location
 
-if match_xxx?() 
+2. The first order function: `add_to_new_features`
+  It only cares about the `next version`'s location
 
-nci = next_category_index()
+3. The middle four categories function
+  If we implement 'Enhancements', we should keep it after 'New features' and before 'Bug fixes'. But to locate the new log, the category above our 'Enhancements' is not useful at all. We can only rely on the category below our 'Enhancements'. 
+  
+  But what if the `before` category not exists? So you depart it into two parts. See `chlog`'s function `meta_add_to_a_category` to know what I do.
 
-# To match the next one
-if match_xxx?(lines[nci]) 
-
-  new_log_loc = nci
-
-end
-
-
-```

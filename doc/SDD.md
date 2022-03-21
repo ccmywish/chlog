@@ -3,6 +3,19 @@
 
 ## Data
 
+Based on the following analysis, I decided to use theses categories (in order) for classification.
+
+1. New features
+2. Enhancements
+3. Bug fixes
+4. Deprecations
+5. Security
+6. Compatibility
+
+And user can specify the `sub category` as the user request, so the above part is called `main category`.
+
+<br>
+
 ###  Who use what changelog?
 
 #### Rubocop
@@ -68,3 +81,15 @@ They seem use a wrong hierarchy of markdown, every release is a `#` (the First h
 <br>
 
 ## User interface
+
+According to [Data Design](#Data), I'll make this available to users.
+
+```shell
+chlog -x loginfo
+```
+Here, `x` can represent any categories word(one of the main categories)'s first char. 
+
+```shell
+chlog -x --sub lginfo
+```
+Here, `--sub` can represent any sub categories wordr as the user specify. This's learned from Elixir's changelog, they use `--sub` as their software components. 

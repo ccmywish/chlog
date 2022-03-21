@@ -16,28 +16,28 @@ Easily maintain Changelog on the cli.
 
 
 ## What a good Changelog looks like?
+ 
+See what [a good Changelog](./A_GOOD_CHANGELOG.md) `chlog` can help to generate all through command line without your editing.
 
-To see what [a good Changelog](./A_GOOD_CHANGELOG.md) `chlog` can help to generate all through command line without your editing.
-
-And you can see how `chlog` help to maintain this `chlog`'s [own Changelog](./CHANGELOG.md).
+See how `chlog` help to maintain [its own Changelog](./CHANGELOG.md).
 
 <br>
 
 
 ## Why?
 
-See why you should [keep a changelog](https://github.com/olivierlacan/keep-a-changelog).
+See why I made this project rather than use existing tool from [CHANGELOG.md](./CHANGELOG.md) `Initialize` part.
 
-And to see why I made this project rather than use existing tool from [CHANGELOG.md](./CHANGELOG.md)'s `Initialize` part.
+See why you should [keep a changelog](https://github.com/olivierlacan/keep-a-changelog).
 
 <br>
 
 
 ## Usage
 
-You can always manually add more info to your Changelog, as `chlog` is only a helper. see [CHANGELOG.md](./CHANGELOG.md) for example.
-
-Notice: The log's category order is keep.
+Notice: 
+1. You can always manually add/change info to your Changelog.
+2. The log's category order is keep.
 
 ```bash
 $ chlog

@@ -2,9 +2,9 @@
 
 ## TODO
 
-1. Implement all main categories
-2. Update time on `unreleased` 
-3. Consider design on `chlog` with `git`
+1. Update time on `unreleased` 
+2. Consider design on `chlog` with `git`
+3. Use sub category
 
 ## WORKING
 

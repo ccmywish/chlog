@@ -93,3 +93,46 @@ Here, `x` can represent any categories word(one of the main categories)'s first 
 chlog -x --sub lginfo
 ```
 Here, `--sub` can represent any sub categories wordr as the user specify. This's learned from Elixir's changelog, they use `--sub` as their software components. 
+
+<br>
+
+## Algorithm
+
+Implement this is really tedious if you just insert / delete setences in the Changelog. The difficult part of this program is to keep the `main category` order. That is, if we change the order, how much should we change the source code?
+
+Here is the psuedocode as Ruby:
+```ruby
+lines    # The Changelog's lines array  
+
+lines[2] # The "Unreleased version", will not change forever
+
+nvi = next_version_index() # The version next Unreleased
+
+lines[4...nvi] # Is the real part of our program should focus
+```
+
+Let's see the order, again
+1. New features
+2. Enhancements
+3. Bug fixes
+4. Security
+5. Compatibility
+6. Deprecations
+
+If we implement 'Enhancements', we should keep it after 'New features' and before 'Bug fixes'. But to locate the new log, the `after` category is not useful at all, we only can rely on the `before` category. But what if the `before` category not exists?
+
+```ruby
+
+if match_xxx?() 
+
+nci = next_category_index()
+
+# To match the next one
+if match_xxx?(lines[nci]) 
+
+  new_log_loc = nci
+
+end
+
+
+```

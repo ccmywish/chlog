@@ -2,15 +2,18 @@
 
 ## [Unreleased](#) (2022-03-21)
 
-### Deprecations:
-
-- Use 'Deprecations' rather than 'Deprecated'
-
 ### New features:
 
-- Add new features5
-- Add new features4
-- Add new features3
+- new feature 7
+- new feature 6
+
+### Enhancements:
+
+- enh 1
+
+### Deprecations:
+
+- Dep 1
 
 <br>
 

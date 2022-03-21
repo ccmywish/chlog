@@ -84,15 +84,23 @@ def match_new_features?(str)
 end
 
 def match_enhancements?(str)
-  str =~ /^\*\*Enhancements:\*\*/
+  str =~ /^### Enhancements:/
 end
 
-def match_bugfix?(str)
-  str =~ /^\*\*Bug fixes:\*\*/
+def match_bug_fixes?(str)
+  str =~ /^### Bug fixes:/
 end
 
 def match_deprecations?(str)
-  str =~ /^\*\*Deprecations:\*\*/
+  str =~ /^### Deprecations:/
+end
+
+def match_security?(str)
+  str =~ /^### Security:/
+end
+
+def match_compatibility?(str)
+  str =~ /^### Compatibility:/
 end
 
 
@@ -101,8 +109,76 @@ def next_version_index(lns_array)
   nvi += 3
 end
 
+def next_category_index(lns_array)
+  nci = lns_array[3...nvi].each_with_index {break _2 if _1.start_with?("### ") }
+  
+  # The not match return value is not nil!! But an array!!
+  if nci.is_a(Integer)
+    nci += 3
+  else
+    nil
+  end
+end
 
+
+def first_lower_order_category_index(lns_array, category_order)
+
+  o = category_order
+
+  order_table = [
+    :match_new_features?,
+    :match_enhancements?,
+    :match_bug_fixes?,
+    :match_security?,
+    :match_compatibility?,
+    :match_deprecations?
+  ]
+
+  nvi = next_version_index(lns_array)
+  
+  while o < order_table.size
+    lns_array[0...nvi].each_with_index do
+      if send(order_table[o], _1)
+        return _2
+      end
+    end
+    o += 1
+  end
+
+  # Next version above 
+  return (nvi - 2)
+end
+
+
+#
+#
+#
 def add_to_new_features(log)
+  content = get_changelog
+  lns = content.lines
+
+  match_unreleased_fail!(lns[2])
+
+  if match_new_features?(lns[4])
+    # The first category in the unreleased version must be 'New features' if we do have 'New features'
+    to_wr = lns[0..5].join + '- ' + log + "\n"
+    File.write("CHANGELOG.md", to_wr + lns[6..].join)
+  else
+    puts "chlog: Add 'New features' category"
+    to_wr = lns[0..3].join + "### New features:\n\n" + '- ' + log + "\n"
+    File.write("CHANGELOG.md", to_wr + lns[3..].join)
+  end
+  puts "chlog: Add log to 'New features'"
+end
+
+
+#
+# main category order: 2
+#
+def add_to_enhancements(log)
+
+  main_category_order =  2
+
   content = get_changelog
   lns = content.lines
 
@@ -110,52 +186,26 @@ def add_to_new_features(log)
 
   nvi = next_version_index(lns)
 
-  ap lns[3..nvi]
-  new_ft_i = lns[3..nvi].each_with_index { break _2 if match_new_features?(_1) }
+  en_i = lns[0...nvi].each_with_index { break _2 if match_enhancements?(_1) }
 
-  # The not match return value is not nil!! But an array!!
-  if new_ft_i.class != Integer
+  if en_i.class != Integer
+    log_loc = first_lower_order_category_index(lns, main_category_order)
     puts "chlog: Add 'New features' category"
-    to_wr = lns[0..(nvi-3)].join + "### New features:\n\n" + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[(nvi-3)..].join)
+    to_wr = lns[0...(log_loc)].join + "### Enhancements:\n\n" + '- ' + log + "\n"
+    File.write("CHANGELOG.md", to_wr + lns[log_loc..].join)
   else
-    new_ft_i += 3
-    # New features exists
-    to_wr = lns[0..new_ft_i+1].join + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[new_ft_i+2..].join)
+    # 'Enhancements' exists
+    to_wr = lns[0..en_i+1].join + '- ' + log + "\n"
+    File.write("CHANGELOG.md", to_wr + lns[en_i+2..].join)
   end
-  
-  puts "chlog: Add to New features"
-end
-
-
-def add_to_enhancements(log)
-
-  content = get_changelog
-  lns = content.lines
-
-  unless match_unreleased? lns[2]
-    to_wr = $unreleased_title + "\n\n"
-    to_wr += "**Enhancements:**\n\n" + '- ' + log + "\n\n<br>\n\n"
-
-    File.write("CHANGELOG.md", "# Changelog\n\n" + to_wr + lns[2..].join)
-  else
-    if match_enhancements? lns[4]
-      # Enhancements exist
-      to_wr = lns[0..5].join + '- ' + log + "\n"
-      File.write("CHANGELOG.md", to_wr + lns[6..].join)
-    else
-      puts "chlog: Add 'Enhancements' category"
-      to_wr = lns[0..3].join + "**Enhancements:**\n\n" + '- ' + log + "\n"
-      File.write("CHANGELOG.md", to_wr + lns[3..].join)
-    end
-  end
-
   puts "chlog: Add to Enhancements"
 end
 
 
 
+#
+#
+#
 def add_to_bug_fixes(log)
   content = get_changelog
   lns = content.lines
@@ -170,15 +220,14 @@ def add_to_bug_fixes(log)
     ni = lns[3..].each_with_index {break _2 if _1.start_with?("## [") }
     ni += 3
 
-    bug_i = lns[3..ni].each_with_index { break _2 if match_bugfix?(_1) }
+    bug_i = lns[0..ni].each_with_index { break _2 if match_bug_fixes?(_1) }
 
     # The not match return value is not nil!! But an array!!
     if bug_i.class != Integer
       puts "chlog: Add 'Bug fixes' category"
-      to_wr = lns[0..(ni-3)].join + "**Bug fix:**\n\n" + '- ' + log + "\n"
+      to_wr = lns[0..(ni-3)].join + "### Bug fixes:\n\n" + '- ' + log + "\n"
       File.write("CHANGELOG.md", to_wr + lns[(ni-3)..].join)
     else
-      bug_i += 3
       # Buf fix exists
       to_wr = lns[0..bug_i+1].join + '- ' + log + "\n"
       File.write("CHANGELOG.md", to_wr + lns[bug_i+2..].join)
@@ -189,44 +238,38 @@ def add_to_bug_fixes(log)
   puts "chlog: Add to Bug fixes"
 end
 
+
+#
+#
+#
 def add_to_security(log)
 end
 
+#
+#
+#
 def add_to_compatibility(log)
 end
 
-
+#
+#
+#
 def add_to_deprecations(log)
-
   content = get_changelog
   lns = content.lines
 
-  unless match_unreleased? lns[2]
-    to_wr = $unreleased_title + "\n\n"
-    to_wr += "**Deprecations:**\n\n" + '- ' + log + "\n\n<br>\n\n"
+  nvi = next_version_index(lns)
+  dep_i = lns[0..nvi].each_with_index { break _2 if match_deprecations?(_1) }
 
-    File.write("CHANGELOG.md", "# Changelog\n\n" + to_wr + lns[2..].join)
+  if dep_i.class != Integer
+    puts "chlog: Add 'Deprecations' category"
+    to_wr = lns[0..(nvi-3)].join + "### Deprecations:\n\n" + '- ' + log + "\n"
+    File.write("CHANGELOG.md", to_wr + lns[(nvi-3)..].join)
   else
-    # next index
-    ni = lns[3..].each_with_index {break _2 if _1.start_with?("## [") }
-    ni += 3
-
-    bug_i = lns[3..ni].each_with_index { break _2 if match_deprecations?(_1) }
-
-    # The not match return value is not nil!! But an array!!
-    if bug_i.class != Integer
-      puts "chlog: Add 'Deprecations' category"
-      to_wr = lns[0..(ni-3)].join + "**Deprecations:**\n\n" + '- ' + log + "\n"
-      File.write("CHANGELOG.md", to_wr + lns[(ni-3)..].join)
-    else
-      bug_i += 3
-      # Buf fix exists
-      to_wr = lns[0..bug_i+1].join + '- ' + log + "\n"
-      File.write("CHANGELOG.md", to_wr + lns[bug_i+2..].join)
-    end
-
+    # 'Deprecations' exists
+    to_wr = lns[0..dep_i+1].join + '- ' + log + "\n"
+    File.write("CHANGELOG.md", to_wr + lns[dep_i+2..].join)
   end
-
   puts "chlog: Add to Deprecations"
 end
 

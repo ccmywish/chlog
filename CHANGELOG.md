@@ -2,9 +2,9 @@
 
 ## [Unreleased](#) (2022-03-20)
 
-**Enhancements:**
+**Deprecations:**
 
-- update README
+- Use 'Deprecations' rather than 'Deprecated'
 
 <br>
 

@@ -16,7 +16,7 @@
 
 - Notice user, developer breaking changes
 
-**Deprecated:**
+**Deprecations:**
 
 - Notice user, developer breaking changes
 

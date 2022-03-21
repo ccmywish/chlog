@@ -54,8 +54,11 @@ usage:
 
   chlog          => Generate CHANGELOG.md
   chlog log      => Add log according to case or to Enhancements by default
+  chlog -n log   => Add log to New features
   chlog -e log   => Add log to Enhancements
   chlog -b log   => Add log to Bug fixes
+  chlog -s log   => Add log to Security
+  chlog -c log   => Add log to Compatibility
   chlog -d log   => Add log to Deprecations
   chlog -r v3.14 => Release version to v3.14
 
@@ -77,6 +80,10 @@ end
 
 def match_deprecations?(str)
   str =~ /^\*\*Deprecations:\*\*/
+end
+
+
+def add_to_new_features(log)
 end
 
 
@@ -107,8 +114,7 @@ end
 
 
 
-def add_to_bugfix(log)
-
+def add_to_bug_fixes(log)
   content = get_changelog
   lns = content.lines
 
@@ -141,6 +147,11 @@ def add_to_bugfix(log)
   puts "chlog: Add to Bug fixes"
 end
 
+def add_to_security(log)
+end
+
+def add_to_compatibility(log)
+end
 
 
 def add_to_deprecations(log)
@@ -180,18 +191,36 @@ end
 
 
 def release_new_version(ver)
+  if ver.nil?
+    puts "chlog: No version supplied! "
+    puts "       Use chlog -r <versiong>!",""
+    exit 1
+  end
+
   content = get_changelog
   lns = content.lines
   # puts lns[2]
+
   unless match_unreleased? lns[2]
-    puts "chlog: Already released #{lns[1][1..]}"
-  else
-    to_wr = "## [#{ver}](#) (#$today)\n"
-    new_cont = "# Changelog\n\n"
-    new_cont += to_wr + lns[3..].join('')
-    File.write("CHANGELOG.md", new_cont)
-    puts "Release #{ver} in changelog!"
+    puts "chlog: Unmathed format with chlog" 
+    # "#{lns[1][1..]}"
+    puts "       Unreleased version must be the third line.", ""
+    exit -1
   end
+
+  header = <<EOF
+# Changelog
+
+## [Unreleased](#) (#$today)
+
+<br>
+
+EOF
+  
+  new_version = "## [#{ver}](#) (#$today)\n"
+  new_cont = header + new_version + lns[3..].join('')
+  File.write("CHANGELOG.md", new_cont)
+  puts "Release #{ver} in changelog!"
 end
 
 
@@ -202,7 +231,7 @@ def add_log_sensitive(log)
   case log
   when /deprecat/i, /remove/i, /^not/i                 then add_to_deprecations(log)
   when /feature/i, /support/i, /add/i, /update/i       then add_to_enhancements(log)
-  when /fix/i, /repair/i, /bug/i, /problem/i, /issue/i then add_to_bugfix(log)
+  when /fix/i, /repair/i, /bug/i, /problem/i, /issue/i then add_to_bug_fixes(log)
   else
     add_to_enhancements(log)
   end
@@ -234,9 +263,11 @@ log = $*[1..].join(' ')
 
 case action
 when ?h, "-h" then help()
+when ?a, "-a" then add_to_new_features(log)
 when ?e, "-e" then add_to_enhancements(log)
-when ?b, "-b" then add_to_bugfix(log)
+when ?b, "-b" then add_to_bug_fixes(log)
 when ?d, "-d" then add_to_deprecations(log)
+when ?s, "-s" then add_to_security(log)
 when ?r, "-r" then release_new_version($*[1])
 else
   help

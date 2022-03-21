@@ -8,9 +8,9 @@ Based on the following analysis, I decided to use theses categories (in order) f
 1. New features
 2. Enhancements
 3. Bug fixes
-4. Deprecations
-5. Security
-6. Compatibility
+4. Security
+5. Compatibility
+6. Deprecations
 
 And user can specify the `sub category` as the user request, so the above part is called `main category`.
 

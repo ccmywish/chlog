@@ -14,7 +14,7 @@
 
 - Not output debug info
 
-**Deprecated:**
+**Deprecations:**
 
 - Not add to Enhancements by default, but according to log's info
 

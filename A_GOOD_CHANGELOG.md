@@ -11,13 +11,22 @@
 - Old features Enhanced, sometimes a little feature change.
 - Stability Enhanced
 - Maintainability Enhanced
+- Portability
 
 **Bug fixes:**
 
-- Notice user, developer breaking changes
+- Fix ....
 
 **Deprecations:**
 
 - Notice user, developer breaking changes
 
 <br>
+
+## [Initialize](#) (2022-03-18)
+
+  Project vision, plan before coding
+
+<br>
+
+<hr>

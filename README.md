@@ -21,12 +21,13 @@ You can always manually add more info to your Changelog, as `chlog` is only a he
 
 ```bash
 $ chlog
-# Generate CHANGELOG.md 
-#   or 
-# Add the latest git log to Changelog
+# Generate CHANGELOG.md or do nothing if already exists
 
 $ chlog log
 # -> Add log according to case or to Enhancements by default
+
+$ chlog -n log
+# -> Add log to 'New features'
 
 $ chlog -e log
 # -> Add log to Enhancements

@@ -70,3 +70,8 @@ $ chlog -r version
 
 <br>
 
+## Develop
+
+You can inside the bin dir, and run `chlog`, I've already took the generated testing-purpose Changelog to .gitignore
+
+<br>

@@ -344,6 +344,7 @@ when ?c, "-c" then add_to_compatibility(log)
 when ?d, "-d" then add_to_deprecations(log)
 when ?r, "-r" then release_new_version($*[1])
 else
+  puts "chlog: Unknown option!"
   help
   # add_log_sensitive $*[0..].join(' ')
 end

@@ -52,7 +52,7 @@ chlog (v#{CHLOG_VERSION}): Help maintain Changelog of your projects
 
 usage:
 
-  chlog          => Generate CHANGELOG.md or copy git log
+  chlog          => Generate CHANGELOG.md
   chlog log      => Add log according to case or to Enhancements by default
   chlog -e log   => Add log to Enhancements
   chlog -b log   => Add log to Bug fixes
@@ -138,7 +138,7 @@ def add_to_bugfix(log)
 
   end
 
-  puts "chlog: Add to Bug fixeses"
+  puts "chlog: Add to Bug fixes"
 end
 
 
@@ -208,6 +208,13 @@ def add_log_sensitive(log)
   end
 end
 
+def with_git
+  gitlog = `git log --oneline -n 1`
+  log = gitlog.split(' ')
+  log = log[1..].join(' ')
+  add_log_sensitive(log)
+end
+
 
 #############
 #    main
@@ -216,10 +223,6 @@ end
 if $*.size == 0
   if File.exists? "CHANGELOG.md"
     get_changelog
-    gitlog = `git log --oneline -n 1`
-    log = gitlog.split(' ')
-    log = log[1..].join(' ')
-    add_log_sensitive(log)
   else
     get_changelog
   end
@@ -236,6 +239,7 @@ when ?b, "-b" then add_to_bugfix(log)
 when ?d, "-d" then add_to_deprecations(log)
 when ?r, "-r" then release_new_version($*[1])
 else
-  add_log_sensitive $*[0..].join(' ')
+  help
+  # add_log_sensitive $*[0..].join(' ')
 end
 

@@ -72,7 +72,7 @@ def match_enhancements?(str)
 end
 
 def match_bugfix?(str)
-  str =~ /^\*\*Bug fix:\*\*/
+  str =~ /^\*\*Bug fixes:\*\*/
 end
 
 def match_deprecations?(str)
@@ -114,7 +114,7 @@ def add_to_bugfix(log)
 
   unless match_unreleased? lns[2]
     to_wr = $unreleased_title + "\n\n"
-    to_wr += "**Bug fix:**\n\n" + '- ' + log + "\n\n<br>\n\n"
+    to_wr += "**Bug fixes:**\n\n" + '- ' + log + "\n\n<br>\n\n"
 
     File.write("CHANGELOG.md", "# Changelog\n\n" + to_wr + lns[2..].join)
   else
@@ -126,7 +126,7 @@ def add_to_bugfix(log)
 
     # The not match return value is not nil!! But an array!!
     if bug_i.class != Integer
-      puts "chlog: Add 'Bug fix' category"
+      puts "chlog: Add 'Bug fixes' category"
       to_wr = lns[0..(ni-3)].join + "**Bug fix:**\n\n" + '- ' + log + "\n"
       File.write("CHANGELOG.md", to_wr + lns[(ni-3)..].join)
     else
@@ -138,7 +138,7 @@ def add_to_bugfix(log)
 
   end
 
-  puts "chlog: Add to Bug fix"
+  puts "chlog: Add to Bug fixeses"
 end
 
 

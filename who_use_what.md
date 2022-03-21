@@ -15,7 +15,7 @@ The categories they use only have three(with order):
 
 - https://github.com/rspec/rspec-core/blob/main/Changelog.md
 
-They use `Deprecations` rather than our `Deprecated`, we'll use this in v1.2 and v1.2+
+They use `Deprecations` rather than our `Deprecated`, I'll use this in v1.2 and v1.2+
 
 <br>
 

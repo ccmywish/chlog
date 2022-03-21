@@ -4,12 +4,13 @@
 
 ### Deprecations:
 
-- Use `###` rather than `**` for main category
 - Use 'Deprecations' rather than 'Deprecated'
 
 ### New features:
 
-- Add 'New features'
+- Add new features5
+- Add new features4
+- Add new features3
 
 <br>
 
@@ -19,7 +20,7 @@
 
 - Not output debug info
 
-**Deprecated:**
+**Deprecations:**
 
 - Not add to Enhancements by default, but according to log's info
 

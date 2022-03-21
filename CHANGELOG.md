@@ -2,21 +2,15 @@
 
 ## [Unreleased](#) (2022-03-21)
 
-<br>
-
-## [v3.11](#) (2022-03-21)
-
-<br>
-
-## [v3.10](#) (2022-03-21)
-
-<br>
-
-## [v3.9](#) (2022-03-21)
-
-**Deprecations:**
+### Deprecations:
 
 - Use 'Deprecations' rather than 'Deprecated'
+
+### New features:
+
+- Add new features5
+- Add new features4
+- Add new features3
 
 <br>
 

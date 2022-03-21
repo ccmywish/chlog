@@ -70,6 +70,19 @@ def match_unreleased?(str)
   str =~ /^## \[Unreleased\]\(.*\) \(\d{4}-\d\d-\d\d\)/
 end
 
+def match_unreleased_fail!(str)
+  unless match_unreleased?(str)
+    puts "chlog: Unmathed format with chlog" 
+    # "#{lns[1][1..]}"
+    puts "       Unreleased version must be the third line.", ""
+    exit -1
+  end
+end
+
+def match_new_features?(str)
+  str =~ /^### New features:/
+end
+
 def match_enhancements?(str)
   str =~ /^\*\*Enhancements:\*\*/
 end
@@ -83,7 +96,36 @@ def match_deprecations?(str)
 end
 
 
+def next_version_index(lns_array)
+  nvi = lns_array[3..].each_with_index {break _2 if _1.start_with?("## [") }
+  nvi += 3
+end
+
+
 def add_to_new_features(log)
+  content = get_changelog
+  lns = content.lines
+
+  match_unreleased_fail!(lns[2])
+
+  nvi = next_version_index(lns)
+
+  ap lns[3..nvi]
+  new_ft_i = lns[3..nvi].each_with_index { break _2 if match_new_features?(_1) }
+
+  # The not match return value is not nil!! But an array!!
+  if new_ft_i.class != Integer
+    puts "chlog: Add 'New features' category"
+    to_wr = lns[0..(nvi-3)].join + "### New features:\n\n" + '- ' + log + "\n"
+    File.write("CHANGELOG.md", to_wr + lns[(nvi-3)..].join)
+  else
+    new_ft_i += 3
+    # New features exists
+    to_wr = lns[0..new_ft_i+1].join + '- ' + log + "\n"
+    File.write("CHANGELOG.md", to_wr + lns[new_ft_i+2..].join)
+  end
+  
+  puts "chlog: Add to New features"
 end
 
 
@@ -193,20 +235,14 @@ end
 def release_new_version(ver)
   if ver.nil?
     puts "chlog: No version supplied! "
-    puts "       Use chlog -r <versiong>!",""
+    puts "       Use chlog -r <version>!",""
     exit 1
   end
 
   content = get_changelog
   lns = content.lines
-  # puts lns[2]
 
-  unless match_unreleased? lns[2]
-    puts "chlog: Unmathed format with chlog" 
-    # "#{lns[1][1..]}"
-    puts "       Unreleased version must be the third line.", ""
-    exit -1
-  end
+  match_unreleased_fail!(lns[2])
 
   header = <<EOF
 # Changelog
@@ -230,8 +266,11 @@ def add_log_sensitive(log)
   # Match the case you want first
   case log
   when /deprecat/i, /remove/i, /^not/i                 then add_to_deprecations(log)
+  when /new/i, /new feature/i                          then add_to_enhancements(log)
   when /feature/i, /support/i, /add/i, /update/i       then add_to_enhancements(log)
   when /fix/i, /repair/i, /bug/i, /problem/i, /issue/i then add_to_bug_fixes(log)
+  when /compatible/i, /compatibility/i                 then add_to_compatibility(log)
+  when /security/i, /secure/i, /cve/i                  then add_to_security(log)
   else
     add_to_enhancements(log)
   end
@@ -251,7 +290,8 @@ end
 
 if $*.size == 0
   if File.exists? "CHANGELOG.md"
-    get_changelog
+    puts "chlog: Already exists Changelog"
+    puts "       Use chlog -h to see options"
   else
     get_changelog
   end
@@ -263,11 +303,12 @@ log = $*[1..].join(' ')
 
 case action
 when ?h, "-h" then help()
-when ?a, "-a" then add_to_new_features(log)
+when ?a, "-n" then add_to_new_features(log)
 when ?e, "-e" then add_to_enhancements(log)
 when ?b, "-b" then add_to_bug_fixes(log)
-when ?d, "-d" then add_to_deprecations(log)
 when ?s, "-s" then add_to_security(log)
+when ?s, "-s" then add_to_compatibility(log)
+when ?d, "-d" then add_to_deprecations(log)
 when ?r, "-r" then release_new_version($*[1])
 else
   help

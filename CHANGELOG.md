@@ -2,6 +2,10 @@
 
 ## [Unreleased](#) (2022-03-21)
 
+<br>
+
+## [v1.2](#) (2022-03-21)
+
 ### New features:
 
 - Force maintain the main categories order

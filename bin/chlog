@@ -3,15 +3,15 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-03-19>
+# Last modified : <2022-03-21>
 #
 # chlog:
 #
-#   Maintain your project's Changelog
+#   Maintain your project's Changelog on the cli.
 #
 # ------------------------------------------------------
 
-CHLOG_VERSION = "1.1"
+CHLOG_VERSION = "1.2"
 
 require 'date'
 $today = Date.today.to_s
@@ -177,67 +177,6 @@ end
 
 
 #
-# main category order: 2
-#
-def add_to_enhancements(log)
-
-  main_category_order =  2
-
-  content = get_changelog
-  lns = content.lines
-
-  match_unreleased_fail!(lns[2])
-
-  nvi = next_version_index(lns)
-
-  has_i = lns[0...nvi].each_with_index { break _2 if match_enhancements?(_1) }
-
-  if has_i.class != Integer
-    log_loc = first_lower_order_category_index(lns, main_category_order)
-    puts "chlog: Add 'Enhancements' category"
-    to_wr = lns[0...(log_loc)].join + "### Enhancements:\n\n" + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[log_loc..].join)
-  else
-    # 'Enhancements' exists
-    to_wr = lns[0..has_i+1].join + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[has_i+2..].join)
-  end
-  puts "chlog: Add to Enhancements"
-end
-
-
-
-#
-# main_category_order: 3
-#
-def add_to_bug_fixes(log)
-
-  main_category_order =  3
-
-  content = get_changelog
-  lns = content.lines
-
-  match_unreleased_fail!(lns[2])
-
-  nvi = next_version_index(lns)
-
-  has_i = lns[0...nvi].each_with_index { break _2 if match_bug_fixes?(_1) }
-
-  if has_i.class != Integer
-    log_loc = first_lower_order_category_index(lns, main_category_order)
-    puts "chlog: Add 'Bug fixes' category"
-    to_wr = lns[0...(log_loc)].join + "### Bug fixes:\n\n" + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[log_loc-1..].join)
-  else
-    # 'Enhancements' exists
-    to_wr = lns[0..has_i+1].join + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[has_i+2..].join)
-  end
-  puts "chlog: Add log to Bug fixes"
-end
-
-
-#
 # A meta function: do the real work other functions delegate
 # 
 # For the category, which isn't one or last of the order table 
@@ -273,6 +212,20 @@ end
 
 
 #
+# main category order: 2
+#
+def add_to_enhancements(log)
+  meta_add_to_a_category(log, 2, "Enhancements")
+end
+
+#
+# main_category_order: 3
+#
+def add_to_bug_fixes(log)
+  meta_add_to_a_category(log, 3, "Bug fixes")
+end
+
+#
 # main_category_order: 4
 #
 def add_to_security(log)
@@ -285,6 +238,7 @@ end
 def add_to_compatibility(log)
   meta_add_to_a_category(log, 5, "Compatibility")
 end
+
 
 #
 # The last of order table
@@ -308,7 +262,6 @@ def add_to_deprecations(log)
   end
   puts "chlog: Add to Deprecations"
 end
-
 
 
 def release_new_version(ver)
@@ -354,6 +307,7 @@ def add_log_sensitive(log)
     add_to_enhancements(log)
   end
 end
+
 
 def with_git
   gitlog = `git log --oneline -n 1`

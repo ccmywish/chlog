@@ -2,16 +2,36 @@
 
 ## [Unreleased](#) (2022-03-21)
 
+<br>
+
+## [v2.2](#) (2022-03-21)
+
+### New features:
+
+- new 1
+
 ### Enhancements:
 
+- enh 2
 - enh 1
+
 ### Bug fixes:
 
 - bug 1
 
+### Security:
+
+- sec 2
+- sec 1
+
 ### Compatibility:
 
+- com 2
 - com 1
+
+### Deprecations:
+
+- dep 1
 
 <br>
 

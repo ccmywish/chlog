@@ -1,6 +1,14 @@
 # Changelog
 
-## [Unreleased](#) (2022-03-21)
+## [Unreleased](#) (2022-03-24)
+
+<br>
+
+## [v1.3](#) (2022-03-24)
+
+### Enhancements:
+
+- Always update to latest time when making a log
 
 <br>
 

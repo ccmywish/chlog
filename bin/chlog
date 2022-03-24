@@ -11,7 +11,7 @@
 #
 # ------------------------------------------------------
 
-CHLOG_VERSION = "1.2"
+CHLOG_VERSION = "1.3"
 
 require 'date'
 $today = Date.today.to_s

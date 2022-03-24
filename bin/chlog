@@ -157,6 +157,7 @@ end
 # The first of order table
 # main category order: 1
 #
+=begin
 def add_to_new_features(log)
   content = get_changelog
   lns = content.lines
@@ -174,14 +175,11 @@ def add_to_new_features(log)
   end
   puts "chlog: Add log to 'New features'"
 end
-
+=end
 
 #
-# A meta function: do the real work other functions delegate
+# A meta function: do the real work other 6 functions delegate
 # 
-# For the category, which isn't one or last of the order table 
-# That's 4 functions
-#
 def meta_add_to_a_category(log, main_category_order, category)
 
   content = get_changelog
@@ -210,6 +208,12 @@ def meta_add_to_a_category(log, main_category_order, category)
   puts "chlog: Add log to #{category}"
 end
 
+#
+# main category order: 1
+#
+def add_to_new_features(log)
+  meta_add_to_a_category(log, 1, "New features")
+end
 
 #
 # main category order: 2
@@ -245,6 +249,10 @@ end
 # main_category_order: 6
 #
 def add_to_deprecations(log)
+  meta_add_to_a_category(log, 6, "Deprecations")
+end
+=begin
+def add_to_deprecations(log)
   content = get_changelog
   lns = content.lines
 
@@ -262,7 +270,7 @@ def add_to_deprecations(log)
   end
   puts "chlog: Add to Deprecations"
 end
-
+=end
 
 def release_new_version(ver)
   if ver.nil?

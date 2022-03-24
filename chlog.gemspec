@@ -1,7 +1,9 @@
+load './bin/chlog'
+
 Gem::Specification.new do |s|
   s.name = "chlog"
-  s.version = "1.2"
-  s.date = "2022-03-21"
+  s.version = CHLOG_VERSION
+  s.date = "2022-03-24"
   
   s.summary = "chlog: help maintain Changelog"
 

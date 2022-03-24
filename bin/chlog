@@ -3,7 +3,7 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-03-21>
+# Last modified : <2022-03-24>
 #
 # chlog:
 #
@@ -18,7 +18,7 @@ $today = Date.today.to_s
 
 UNRELEASED_TITLE = "## [Unreleased](#) (#$today)"
 
-$chlog_template = <<EOT
+CHLOG_TEMPLATE = <<EOT
 # Changelog
 
 #{UNRELEASED_TITLE}
@@ -42,7 +42,7 @@ def get_changelog
     return File.read file
   else
     puts "chlog: Auto generate CHANGELOG.md"
-    File.write(file, $chlog_template)
+    File.write(file, CHLOG_TEMPLATE)
     return File.read file
   end
 end

@@ -123,6 +123,64 @@ def next_category_index(lns_array)
 end
 
 
+=begin
+def last_list_in_main_category(cat, lns_array)
+
+  nvi = next_version_index(lns_array)
+  
+  # In unreleased
+  #   find where is the `cat`
+  cat_i = lns_array[0..nvi].each_with_index do 
+    if _1 =~ /^### #{cat}:/
+      break _2
+    end
+    nil
+  end
+
+  if cat_i == nil
+    puts "Fix this situation!!!"
+  end
+
+  # find the sub cat
+  sub_cat = lns_array[cat_i+2..nvi].each_with_index do 
+    break _2 if _1  !~ /^\*\*.*\*\*/
+  end
+
+  # sub cat exists
+  if sub_cat.is_a?(Integer)
+    sub_cat += cat_i + 2
+      # write (sub_cat +2) 写在这里
+  else
+    # sub cat not exists
+    # write list_i + 1 写在这里 ** 
+
+  end
+
+end
+=end
+
+
+#
+#  ### New features:
+#   
+#  - xaaaaa
+#  - xbbbbb
+#  - xccccc    [-> this]
+#
+def find_main_category_last_list_item_index(lns, 
+                                            main_cat_index, 
+                                            first_lower_order_category_index)
+  mci = main_cat_index
+  nci = first_lower_order_category_index
+  
+  list_i = lns[mci+2..nci].each_with_index do 
+    break _2 if _1  !~  /^- .*/
+  end
+  list_i += mci+2 - 1
+end
+
+
+
 $order_table = [
   :match_new_features?,
   :match_enhancements?,
@@ -203,14 +261,49 @@ def meta_add_to_a_category(log, main_category_order, category)
   #
   lns[2] = UNRELEASED_TITLE + "\n"
 
+  f_l_o_c_i = first_lower_order_category_index(lns, main_category_order)
+
   if has_i.class != Integer
+  # The main category not exists
+    
     # Not need adjust
-    log_loc = first_lower_order_category_index(lns, main_category_order)
+    log_loc = f_l_o_c_i
     puts "chlog: Add '#{category}' category"
     to_wr = lns[0...(log_loc)].join + "### #{category}:\n\n" + '- ' + log + "\n"
     File.write("CHANGELOG.md", to_wr + lns[log_loc-1..].join)
+  
   else
-    # The category exists
+  # The main category exists
+    
+    if $sub_category
+    
+    # from first list item to next main cat
+    #   search if sub cat already exists
+    sub_cat_i = lns[has_i+2...f_l_o_c_i].each_with_index do 
+      break _2 if _1 =~ /^\*\*#{$sub_category}\*\*/
+    end
+
+    if !sub_cat_i.is_a?(Integer)
+    # the sub category not exists
+    
+      sub_cat_i = 2 + find_main_category_last_list_item_index(lns,has_i,f_l_o_c_i) 
+      to_wr = lns[0...sub_cat_i].join + "**#{$sub_category}**\n\n" + '  - ' + log + "\n\n"
+      File.write("CHANGELOG.md", to_wr + lns[sub_cat_i..].join)
+    else
+    # the sub category exists  
+
+      sub_cat_i +=  has_i+2
+      to_wr = lns[0..sub_cat_i+1].join + '  - ' + log + "\n"
+      File.write("CHANGELOG.md", to_wr + lns[sub_cat_i+2..].join)
+    end
+
+    puts "chlog: Add log to #{category}/#{$sub_category}"
+    return 
+    end # end of if $sub_category
+
+
+    # situation: no sub category 
+    
     to_wr = lns[0..has_i+1].join + '- ' + log + "\n"
     File.write("CHANGELOG.md", to_wr + lns[has_i+2..].join)
   end
@@ -349,7 +442,15 @@ if $*.size == 0
 end
 
 action = $*[0]
-log = $*[1..].join(' ')
+if $*[1] =~ /--(.*)/
+  puts "-> DEBUG: #$1"
+  $sub_category = $1 
+  log = $*[2..].join(' ')
+else
+  $sub_category = nil
+  log = $*[1..].join(' ')
+end
+
 
 case action
 when ?h, "-h" then help()

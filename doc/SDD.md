@@ -98,6 +98,8 @@ Here, `--sub` can represent any sub categories wordr as the user specify. This's
 
 ## Algorithm
 
+### Part I: manage main category
+
 Implement this is really tedious if you just insert / delete setences in the Changelog. The difficult part of this program is to keep the `main category` order. That is, if we change the order, how much should we change the source code?
 
 Here is the psuedocode as Ruby:
@@ -131,4 +133,28 @@ The algorithm deployed in our program is to make `add_to_a_category` into three 
   If we implement 'Enhancements', we should keep it after 'New features' and before 'Bug fixes'. But to locate the new log, the category above our 'Enhancements' is not useful at all. We can only rely on the category below our 'Enhancements'. 
   
   But what if the `before` category not exists? So you depart it into two parts. See `chlog`'s function `meta_add_to_a_category` to know what I do.
+
+
+### Part II: manage main sub category
+
+```
+## [Unreleased](#) (2022-03-24)
+
+### New features:     [ cat 1 ]
+
+- xaaaaa
+- xbbbbb
+- xccccc           < last list item >
+
+**Opuu**             [ sub cat 1]
+
+  - feat2
+
+**Gudu**             [ sub cat 1]
+
+  - fafaf
+
+### Enhancements:     [ cat 2 ]
+```
+
 

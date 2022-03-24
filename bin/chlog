@@ -16,12 +16,12 @@ CHLOG_VERSION = "1.2"
 require 'date'
 $today = Date.today.to_s
 
-$unreleased_title = "## [Unreleased](#) (#$today)"
+UNRELEASED_TITLE = "## [Unreleased](#) (#$today)\n"
 
 $chlog_template = <<EOT
 # Changelog
 
-#$unreleased_title
+##{UNRELEASED_TITLE}
 
 <br>
 
@@ -193,6 +193,9 @@ def meta_add_to_a_category(log, main_category_order, category)
     # Adjust to index of the order table 
     break _2 if send($order_table[main_category_order-1], _1)
   end
+
+  # Always update to latest time when make a log
+  lns[2] = UNRELEASED_TITLE
 
   if has_i.class != Integer
     # Not need adjust

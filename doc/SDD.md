@@ -3,7 +3,7 @@
 
 ## Data
 
-Based on the following analysis, I decided to use theses categories (in order) for classification.
+Based on the following analysis, I decided to use theses (main) categories (in order) for classification.
 
 1. New features
 2. Enhancements
@@ -134,8 +134,11 @@ The algorithm deployed in our program is to make `add_to_a_category` into three 
   
   But what if the `before` category not exists? So you depart it into two parts. See `chlog`'s function `meta_add_to_a_category` to know what I do.
 
+In fact, all 6 main categories can use this meta function.
 
-### Part II: manage main sub category
+<br>
+
+### Part II: manage sub category
 
 ```
 ## [Unreleased](#) (2022-03-24)
@@ -148,7 +151,7 @@ The algorithm deployed in our program is to make `add_to_a_category` into three 
 
 **Opuu**             [ sub cat 1]
 
-  - feat2
+  - feat2 (Notice here should have an indentation)
 
 **Gudu**             [ sub cat 1]
 
@@ -157,4 +160,12 @@ The algorithm deployed in our program is to make `add_to_a_category` into three 
 ### Enhancements:     [ cat 2 ]
 ```
 
+The II part is based on I part, so we divide it into 4 situations:
+1. main category exists
+  - no sub category
+  - have sub category
+2. main category not exists
+  - no sub category
+  - have sub category
 
+Just notice what I mark in the markdown block above, and see my implementation, you'll know well.

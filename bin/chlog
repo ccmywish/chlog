@@ -250,7 +250,7 @@ def meta_add_to_a_category(log, main_category_order, category)
 
   nvi = next_version_index(lns)
   # To find the existing category line
-  has_i = lns[0...nvi].each_with_index do
+  main_cat_i = lns[0...nvi].each_with_index do
     # Adjust to index of the order table 
     break _2 if send($order_table[main_category_order-1], _1)
   end
@@ -266,7 +266,7 @@ def meta_add_to_a_category(log, main_category_order, category)
 
   f_l_o_c_i = first_lower_order_category_index(lns, main_category_order)
 
-  if has_i.class != Integer
+  if main_cat_i.class != Integer
   ################################################################################
   # The main category not exists
   ################################################################################
@@ -307,20 +307,20 @@ def meta_add_to_a_category(log, main_category_order, category)
     
     # from first list item to next main cat
     #   search if sub cat already exists
-    sub_cat_i = lns[has_i+2...f_l_o_c_i].each_with_index do 
+    sub_cat_i = lns[main_cat_i+2...f_l_o_c_i].each_with_index do 
       break _2 if _1 =~ /^\*\*#{$sub_category}\*\*/
     end
 
     if !sub_cat_i.is_a?(Integer)
     # the sub category not exists
     
-      sub_cat_i = 2 + find_main_category_last_list_item_index(lns,has_i,f_l_o_c_i) 
+      sub_cat_i = 2 + find_main_category_last_list_item_index(lns,main_cat_i,f_l_o_c_i) 
       to_wr = lns[0...sub_cat_i].join + "**#{$sub_category}**\n\n" + '  - ' + log + "\n\n"
       File.write("CHANGELOG.md", to_wr + lns[sub_cat_i..].join)
     else
     # the sub category exists  
 
-      sub_cat_i +=  has_i+2
+      sub_cat_i +=  main_cat_i+2
       to_wr = lns[0..sub_cat_i+1].join + '  - ' + log + "\n"
       File.write("CHANGELOG.md", to_wr + lns[sub_cat_i+2..].join)
     end
@@ -334,14 +334,14 @@ def meta_add_to_a_category(log, main_category_order, category)
 
     # situation: no sub category 
 
-    to_wr = lns[0..has_i+1].join + '- ' + log + "\n"
+    to_wr = lns[0..main_cat_i+1].join + '- ' + log + "\n"
     
     # main category list should be separated with
     # sub category
-    if lns[has_i+2] =~ /\*\*.*/
+    if lns[main_cat_i+2] =~ /\*\*.*/
       to_wr += "\n"
     end
-    File.write("CHANGELOG.md", to_wr + lns[has_i+2..].join)
+    File.write("CHANGELOG.md", to_wr + lns[main_cat_i+2..].join)
   end
   puts "chlog: Add log to #{category}"
 end

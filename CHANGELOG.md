@@ -8,6 +8,12 @@
 
   - Support sub category, such as a software component
 
+### Enhancements:
+
+**Internal**
+
+  - Refactor var name
+
 <br>
 
 ## [v1.3](#) (2022-03-24)

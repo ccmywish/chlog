@@ -50,13 +50,13 @@ end
 
 def help
   puts <<EOH
-chlog (v#{CHLOG_VERSION}): Help maintain Changelog of your projects
+chlog (v#{CHLOG_VERSION}): Help maintain the Changelog of your projects
 
 usage:
 
   chlog                  => Generate CHANGELOG.md
   chlog -g (-m) (--sub)  => Reuse last commit log (m category / sub category)
-  chlog (--sub) log      => Determine category, add log (default Enhancements) (/ sub category)
+  chlog (--sub) log      => Determine main category(fallback Enhancements) (/ sub category) add log  
   chlog -n (--sub) log   => Add log to New features (/ sub category)
   chlog -e (--sub) log   => Add log to Enhancements (/ sub category)
   chlog -b (--sub) log   => Add log to Bug fixes    (/ sub category)

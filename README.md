@@ -43,26 +43,29 @@ Notice:
 $ chlog
 # Generate CHANGELOG.md or do nothing if already exists
 
-$ chlog log
-# -> Add log according to case or to Enhancements by default
+$ chlog (--sub) log      
+# -> Auto determine main category(fallback Enhancements) (/ sub category) add log 
 
-$ chlog -n log
-# -> Add log to 'New features'
+$ chlog -g (-m) (--sub)
+# -> Reuse last commit log (m category / sub category)
 
-$ chlog -e log
-# -> Add log to 'Enhancements'
+$ chlog -n (--sub) log
+# -> Add log to 'New features'/'sub categories' 
 
-$ chlog -b log
-# -> Add log to 'Bug fixes'
+$ chlog -e (--sub) log
+# -> Add log to 'Enhancements'/'sub categories' 
 
-$ chlog -s log
-# -> Add log to 'Security'
+$ chlog -b (--sub) log
+# -> Add log to 'Bug fixes'/'sub categories' 
 
-$ chlog -c log
-# -> Add log to 'Compatibility'
+$ chlog -s (--sub) log
+# -> Add log to 'Security'/'sub categories' 
 
-$ chlog -d log
-# -> Add log to 'Deprecations'
+$ chlog -c (--sub) log
+# -> Add log to 'Compatibility'/'sub categories' 
+
+$ chlog -d (--sub) log
+# -> Add log to 'Deprecations'/'sub categories' 
 
 $ chlog -r version
 # -> Release to version

@@ -3,7 +3,7 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-03-24>
+# Last modified : <2022-03-25>
 #
 # chlog:
 #
@@ -124,43 +124,6 @@ def next_category_index(lns_array)
 end
 
 
-=begin
-def last_list_in_main_category(cat, lns_array)
-
-  nvi = next_version_index(lns_array)
-  
-  # In unreleased
-  #   find where is the `cat`
-  cat_i = lns_array[0..nvi].each_with_index do 
-    if _1 =~ /^### #{cat}:/
-      break _2
-    end
-    nil
-  end
-
-  if cat_i == nil
-    puts "Fix this situation!!!"
-  end
-
-  # find the sub cat
-  sub_cat = lns_array[cat_i+2..nvi].each_with_index do 
-    break _2 if _1  !~ /^\*\*.*\*\*/
-  end
-
-  # sub cat exists
-  if sub_cat.is_a?(Integer)
-    sub_cat += cat_i + 2
-      # write (sub_cat +2) 写在这里
-  else
-    # sub cat not exists
-    # write list_i + 1 写在这里 ** 
-
-  end
-
-end
-=end
-
-
 #
 #  ### New features:
 #   
@@ -212,29 +175,6 @@ def first_lower_order_category_index(lns_array, category_order)
 end
 
 
-#
-# The first of order table
-# main category order: 1
-#
-=begin
-def add_to_new_features(log)
-  content = get_changelog
-  lns = content.lines
-
-  match_unreleased_fail!(lns[2])
-
-  if match_new_features?(lns[4])
-    # The first category in the unreleased version must be 'New features' if we do have 'New features'
-    to_wr = lns[0..5].join + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[6..].join)
-  else
-    puts "chlog: Add 'New features' category"
-    to_wr = lns[0..3].join + "### New features:\n\n" + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[3..].join)
-  end
-  puts "chlog: Add log to 'New features'"
-end
-=end
 
 #
 # A meta function: do the real work other 6 functions delegate
@@ -391,28 +331,10 @@ def add_to_deprecations(log)
   meta_add_to_a_category(log, 6, "Deprecations")
 end
 
-=begin
-def add_to_deprecations(log)
-  content = get_changelog
-  lns = content.lines
 
-  nvi = next_version_index(lns)
-  dep_i = lns[0..nvi].each_with_index { break _2 if match_deprecations?(_1) }
-
-  if dep_i.class != Integer
-    puts "chlog: Add 'Deprecations' category"
-    to_wr = lns[0..(nvi-3)].join + "### Deprecations:\n\n" + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[(nvi-3)..].join)
-  else
-    # 'Deprecations' exists
-    to_wr = lns[0..dep_i+1].join + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[dep_i+2..].join)
-  end
-  puts "chlog: Add to Deprecations"
-end
-=end
-
-
+#
+# Release a version
+#
 def release_new_version(ver)
   if ver.nil?
     puts "chlog: No version supplied! "

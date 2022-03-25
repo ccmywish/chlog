@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased](#) (2022-03-24)
+## [Unreleased](#) (2022-03-25)
+
+### New features:
+
+**User Interface**
+
+  - Support sub category, such as a software component
 
 <br>
 

@@ -328,9 +328,16 @@ def meta_add_to_a_category(log, main_category_order, category)
     ########################################
 
 
+
     # situation: no sub category 
 
     to_wr = lns[0..has_i+1].join + '- ' + log + "\n"
+    
+    # main category list should be separated with
+    # sub category
+    if lns[has_i+2] =~ /\*\*.*/
+      to_wr += "\n"
+    end
     File.write("CHANGELOG.md", to_wr + lns[has_i+2..].join)
   end
   puts "chlog: Add log to #{category}"

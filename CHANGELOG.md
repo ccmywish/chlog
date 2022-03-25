@@ -6,6 +6,7 @@
 
 **User Interface**
 
+  - Support chlog after your commit
   - Support sub category, such as a software component
 
 ### Enhancements:

@@ -55,8 +55,8 @@ chlog (v#{CHLOG_VERSION}): Help maintain Changelog of your projects
 usage:
 
   chlog                  => Generate CHANGELOG.md
-  chlog -g               => Add log according to last git commit interactively
-  chlog (--sub) log      => Auto determine type and add log (default Enhancements) (/ sub category)
+  chlog -g (-m) (--sub)  => Reuse last commit log (m category / sub category)
+  chlog (--sub) log      => Determine category, add log (default Enhancements) (/ sub category)
   chlog -n (--sub) log   => Add log to New features (/ sub category)
   chlog -e (--sub) log   => Add log to Enhancements (/ sub category)
   chlog -b (--sub) log   => Add log to Bug fixes    (/ sub category)
@@ -447,7 +447,7 @@ def add_log_sensitive(log)
   # Match the case you want first
   case log
   when /deprecat/i, /remove/i, /^not/i                 then add_to_deprecations(log)
-  when /new/i, /add/i, /new feature/i, /support/i      then add_to_new_features(log)
+  when /^new/i, /^add/i, /new feature/i, /^support/i   then add_to_new_features(log)
   when /feature/i, /update/i                           then add_to_enhancements(log)
   when /fix/i, /repair/i, /bug/i, /problem/i, /issue/i then add_to_bug_fixes(log)
   when /compatible/i, /compatibility/i                 then add_to_compatibility(log)
@@ -458,44 +458,80 @@ def add_log_sensitive(log)
 end
 
 
-def add_with_git
+#
+# reuse git commit log
+#
+def add_with_git(first, second)
+
+  main_category = nil
+
+  if first =~ /^-([nebscd])$/
+    main_category = $1
+  elsif first =~ /^--(.*)/
+    $sub_category = $1
+  end
+
+  if second =~ /^-([nebscd])$/
+    main_category = $1
+  elsif second =~ /^--(.*)/
+    $sub_category = $1
+  end
+
+
   gitlog = `git log --oneline -n 1`
   log = gitlog.split(' ')
   log = log[1..].join(' ')
   puts "last commit: #{log}"
-  puts "What sub category? Input or leave it blank"
-  print '>'
-  sub = STDIN.gets.chomp
-  case sub
-  when ''
-    $sub_category = nil
-  else
-    $sub_category = sub
+
+  if $sub_category.nil?
+    puts "What sub category? Input or leave it blank"
+    print '>'
+    sub = STDIN.gets.chomp
+    case sub
+    when ''
+      $sub_category = nil
+    else
+      $sub_category = sub
+    end
   end
 
-  puts "What main category? Input number or leave it blank to auto determine"
-  puts <<~EOC
-  ----------------
-  1. New features
-  2. Enhancements
-  3. Bug fixes
-  4. Security
-  5. Compatibility
-  6. Deprecations
-  ----------------
-  EOC
-  print '>'
-  case STDIN.gets.chomp
-  when '1'      then add_to_new_features(log)
-  when '2'      then add_to_enhancements(log)
-  when '3'      then add_to_bug_fixes(log)
-  when '4'      then add_to_security(log)
-  when '5'      then add_to_compatibility(log)
-  when '6'      then add_to_deprecations(log)
+  if main_category.nil?
+    puts "What main category? Input number or leave it blank to auto determine"
+    puts <<~EOC
+    ----------------
+    1. New features
+    2. Enhancements
+    3. Bug fixes
+    4. Security
+    5. Compatibility
+    6. Deprecations
+    ----------------
+    EOC
+  
+    print '>'
+    case STDIN.gets.chomp
+    when '1'      then add_to_new_features(log)
+    when '2'      then add_to_enhancements(log)
+    when '3'      then add_to_bug_fixes(log)
+    when '4'      then add_to_security(log)
+    when '5'      then add_to_compatibility(log)
+    when '6'      then add_to_deprecations(log)
+    else
+      add_log_sensitive(log)
+    end
   else
-    add_log_sensitive(log)
+    tbl = {
+      'n' => :add_to_new_features,
+      'e' => :add_to_enhancements,
+      'b' => :add_to_bug_fixes,
+      's' => :add_to_security,
+      'c' => :add_to_compatibility,
+      'd' => :add_to_deprecations
+    }
+    send(tbl[main_category], log)
   end
 
+  # Auto commit
   files = `git diff --exit-code --name-only`
   files = files.split
   if (files.size == 1) && (files[0] == "CHANGELOG.md")
@@ -545,7 +581,7 @@ when ?s, "-s" then add_to_security(log)
 when ?c, "-c" then add_to_compatibility(log)
 when ?d, "-d" then add_to_deprecations(log)
 when ?r, "-r" then release_new_version($*[1])
-when ?d, "-g" then add_with_git()
+when ?d, "-g" then add_with_git($*[1], $*[2])
 else
   if action =~ /^-[^-]*$/
     puts "chlog: Unknown option!"

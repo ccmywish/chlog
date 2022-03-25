@@ -11,6 +11,7 @@
 
 ### Enhancements:
 
+- Remove unused option
 - Update document
 
 **Internal**

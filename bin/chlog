@@ -264,17 +264,42 @@ def meta_add_to_a_category(log, main_category_order, category)
   f_l_o_c_i = first_lower_order_category_index(lns, main_category_order)
 
   if has_i.class != Integer
+  ################################################################################
   # The main category not exists
+  ################################################################################
+
+
+    ########################################
+    if $sub_category
     
-    # Not need adjust
+    # Because the main category not exists,
+    #   nor does the sub category
+    #
+    sub_cat_i = f_l_o_c_i 
+    to_wr = lns[0...sub_cat_i].join + "### #{category}:\n\n" + "**#{$sub_category}**\n\n" + '  - ' + log + "\n\n"
+    File.write("CHANGELOG.md", to_wr + lns[sub_cat_i..].join)
+    
+    puts "chlog: Add log to #{category}/#{$sub_category}"
+    return 
+    end # end of if $sub_category
+    ########################################
+
+
+    # situation: no sub category 
+    
+    # Not need adjust to the index of the order table
     log_loc = f_l_o_c_i
     puts "chlog: Add '#{category}' category"
     to_wr = lns[0...(log_loc)].join + "### #{category}:\n\n" + '- ' + log + "\n"
     File.write("CHANGELOG.md", to_wr + lns[log_loc-1..].join)
   
   else
+  ################################################################################
   # The main category exists
+  ################################################################################
     
+
+    ########################################
     if $sub_category
     
     # from first list item to next main cat
@@ -300,10 +325,11 @@ def meta_add_to_a_category(log, main_category_order, category)
     puts "chlog: Add log to #{category}/#{$sub_category}"
     return 
     end # end of if $sub_category
+    ########################################
 
 
     # situation: no sub category 
-    
+
     to_wr = lns[0..has_i+1].join + '- ' + log + "\n"
     File.write("CHANGELOG.md", to_wr + lns[has_i+2..].join)
   end

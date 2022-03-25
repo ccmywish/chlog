@@ -495,15 +495,15 @@ end
 
 
 case action
-when ?h, "-h", "--help" then help()
-when ?n, "-n" then add_to_new_features(log)
-when ?e, "-e" then add_to_enhancements(log)
-when ?b, "-b" then add_to_bug_fixes(log)
-when ?s, "-s" then add_to_security(log)
-when ?c, "-c" then add_to_compatibility(log)
-when ?d, "-d" then add_to_deprecations(log)
-when ?r, "-r" then release_new_version($*[1])
-when ?d, "-g" then add_with_git($*[1], $*[2])
+when "-h", "--help" then help()
+when "-n" then add_to_new_features(log)
+when "-e" then add_to_enhancements(log)
+when "-b" then add_to_bug_fixes(log)
+when "-s" then add_to_security(log)
+when "-c" then add_to_compatibility(log)
+when "-d" then add_to_deprecations(log)
+when "-r" then release_new_version($*[1])
+when "-g" then add_with_git($*[1], $*[2])
 else
   if action =~ /^-[^-]*$/
     puts "chlog: Unknown option!"

@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased](#) (2022-03-25)
+## [Unreleased](#) (2022-04-06)
+
+<br>
+
+## [v1.4](#) (2022-03-25)
 
 ### New features:
 

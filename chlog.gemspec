@@ -3,7 +3,8 @@ load './bin/chlog'
 Gem::Specification.new do |s|
   s.name = "chlog"
   s.version = CHLOG_VERSION
-  s.date = "2022-03-24"
+  require 'date'
+  s.date = Date.today.to_s
   
   s.summary = "chlog: help maintain Changelog"
 

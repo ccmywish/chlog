@@ -55,7 +55,7 @@ chlog (v#{CHLOG_VERSION}): Help maintain the Changelog of your projects
 
 usage:
 
-  chlog                  => Generate CHANGELOG.md
+  chlog                  => Generate CHANGELOG.md in git root
   chlog -g (-m) (--sub)  => Reuse last commit log (m category / sub category)
   chlog (--sub) log      => Determine main category(fallback Enhancements) (/ sub category) add log  
   chlog -n (--sub) log   => Add log to New features (/ sub category)

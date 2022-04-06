@@ -41,7 +41,7 @@ Notice:
 
 ```bash
 $ chlog
-# Generate CHANGELOG.md or do nothing if already exists
+# Generate CHANGELOG.md in your git root or do nothing if already exists
 
 $ chlog (--sub) log      
 # -> Auto determine main category(fallback Enhancements) (/ sub category) add log 
@@ -70,11 +70,5 @@ $ chlog -d (--sub) log
 $ chlog -r version
 # -> Release to version
 ```
-
-<br>
-
-## Develop
-
-You can inside the bin dir, and run `chlog`, I've already took the generated testing-purpose Changelog to .gitignore
 
 <br>

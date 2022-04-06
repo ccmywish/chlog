@@ -2,6 +2,10 @@
 
 ## [Unreleased](#) (2022-04-06)
 
+### Enhancements:
+
+- Operate Changelog always in git top-level dir
+
 <br>
 
 ## [v1.4](#) (2022-03-25)

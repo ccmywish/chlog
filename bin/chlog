@@ -3,7 +3,7 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-03-25>
+# Last modified : <2022-04-06>
 #
 # chlog:
 #
@@ -11,7 +11,7 @@
 #
 # ------------------------------------------------------
 
-CHLOG_VERSION = "1.4"
+CHLOG_VERSION = "1.5"
 
 require 'date'
 $today = Date.today.to_s
@@ -35,13 +35,14 @@ This Changelog is maintained with [chlog](https://github.com/ccmywish/chlog)
 
 EOT
 
+$Changelog_file = `git rev-parse --show-toplevel`.chomp + '/CHANGELOG.md'
 
 def get_changelog
-  file = "CHANGELOG.md"
+  file = $Changelog_file
   if File.exists? file
     return File.read file
   else
-    puts "chlog: Auto generate CHANGELOG.md"
+    puts "chlog: Auto generate #$Changelog_file"
     File.write(file, CHLOG_TEMPLATE)
     return File.read file
   end
@@ -221,7 +222,7 @@ def meta_add_to_a_category(log, main_category_order, category)
     #
     sub_cat_i = f_l_o_c_i 
     to_wr = lns[0...sub_cat_i].join + "### #{category}:\n\n" + "**#{$sub_category}**\n\n" + '  - ' + log + "\n\n"
-    File.write("CHANGELOG.md", to_wr + lns[sub_cat_i..].join)
+    File.write($Changelog_file, to_wr + lns[sub_cat_i..].join)
     
     puts "chlog: Add log to #{category}/#{$sub_category}"
     return 
@@ -235,7 +236,7 @@ def meta_add_to_a_category(log, main_category_order, category)
     log_loc = f_l_o_c_i
     puts "chlog: Add '#{category}' category"
     to_wr = lns[0...(log_loc)].join + "### #{category}:\n\n" + '- ' + log + "\n"
-    File.write("CHANGELOG.md", to_wr + lns[log_loc-1..].join)
+    File.write($Changelog_file, to_wr + lns[log_loc-1..].join)
   
   else
   ################################################################################
@@ -257,13 +258,13 @@ def meta_add_to_a_category(log, main_category_order, category)
     
       sub_cat_i = 2 + find_main_category_last_list_item_index(lns,main_cat_i,f_l_o_c_i) 
       to_wr = lns[0...sub_cat_i].join + "**#{$sub_category}**\n\n" + '  - ' + log + "\n\n"
-      File.write("CHANGELOG.md", to_wr + lns[sub_cat_i..].join)
+      File.write($Changelog_file, to_wr + lns[sub_cat_i..].join)
     else
     # the sub category exists  
 
       sub_cat_i +=  main_cat_i+2
       to_wr = lns[0..sub_cat_i+1].join + '  - ' + log + "\n"
-      File.write("CHANGELOG.md", to_wr + lns[sub_cat_i+2..].join)
+      File.write($Changelog_file, to_wr + lns[sub_cat_i+2..].join)
     end
 
     puts "chlog: Add log to #{category}/#{$sub_category}"
@@ -282,7 +283,7 @@ def meta_add_to_a_category(log, main_category_order, category)
     if lns[main_cat_i+2] =~ /\*\*.*/
       to_wr += "\n"
     end
-    File.write("CHANGELOG.md", to_wr + lns[main_cat_i+2..].join)
+    File.write($Changelog_file, to_wr + lns[main_cat_i+2..].join)
   end
   puts "chlog: Add log to #{category}"
 end
@@ -358,7 +359,7 @@ EOF
   
   new_version = "## [#{ver}](#) (#$today)\n"
   new_cont = header + new_version + lns[3..].join('')
-  File.write("CHANGELOG.md", new_cont)
+  File.write($Changelog_file, new_cont)
   puts "Release #{ver} in changelog!"
 end
 
@@ -461,7 +462,7 @@ def add_with_git(first, second)
     print '>'
     case STDIN.gets.chomp.downcase
     when '', 'yes', 'y'
-      system("git add ./CHANGELOG.md && git commit -m 'Update the Changelog' ")
+      system("git add #$Changelog_file && git commit -m 'Update the Changelog' ")
     else
       "do nothing" 
     end
@@ -474,8 +475,8 @@ end
 #############
 
 if $*.size == 0
-  if File.exists? "CHANGELOG.md"
-    puts "chlog: Already exists Changelog"
+  if File.exists? $Changelog_file
+    puts "chlog: Already exists Changelog (#$Changelog_file)"
     puts "       Use chlog -h to see options"
   else
     get_changelog

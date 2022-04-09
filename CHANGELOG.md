@@ -1,6 +1,14 @@
 # Changelog
 
-## [Unreleased](#) (2022-04-06)
+## [Unreleased](#) (2022-04-09)
+
+### Enhancements:
+
+- Adjust order of category determine
+
+<br>
+
+## [v1.5](#) (2022-04-06)
 
 ### Enhancements:
 

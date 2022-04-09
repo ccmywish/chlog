@@ -3,7 +3,7 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-04-06>
+# Last modified : <2022-04-09>
 #
 # chlog:
 #
@@ -369,12 +369,12 @@ def add_log_sensitive(log)
   # Be careful the when statements order
   # Match the case you want first
   case log
-  when /deprecat/i, /remove/i, /^not/i                 then add_to_deprecations(log)
+  when /deprecat/i, /^remove/i, /^not/i                then add_to_deprecations(log)
   when /^new/i, /^add/i, /new feature/i, /^support/i   then add_to_new_features(log)
-  when /feature/i, /update/i                           then add_to_enhancements(log)
-  when /fix/i, /repair/i, /bug/i, /problem/i, /issue/i then add_to_bug_fixes(log)
+  when /^fix/i, /repair/i, /bug/i                      then add_to_bug_fixes(log)
   when /compatible/i, /compatibility/i                 then add_to_compatibility(log)
   when /security/i, /secure/i, /cve/i                  then add_to_security(log)
+  when /feature/i, /update/i, /problem/i, /issue/i     then add_to_enhancements(log)
   else
     add_to_enhancements(log)
   end

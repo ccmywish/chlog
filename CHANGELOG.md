@@ -2,6 +2,10 @@
 
 ## [Unreleased](#) (2022-04-09)
 
+### New features:
+
+- Add main file check
+
 ### Enhancements:
 
 - Adjust order of category determine

@@ -474,6 +474,8 @@ end
 #    main
 #############
 
+if __FILE__ == $0
+
 if $*.size == 0
   if File.exists? $Changelog_file
     puts "chlog: Already exists Changelog (#$Changelog_file)"
@@ -522,3 +524,6 @@ else
   end
 end
 
+
+# end main 
+end

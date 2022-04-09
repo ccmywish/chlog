@@ -11,10 +11,7 @@
 #
 # ------------------------------------------------------
 
-puts __FILE__
-puts $0
-
-CHLOG_VERSION = "1.6.alpha"
+CHLOG_VERSION = "1.6.1"
 
 require 'date'
 $today = Date.today.to_s
@@ -477,8 +474,6 @@ end
 #    main
 #############
 
-if __FILE__ == $0
-
 if $*.size == 0
   if File.exists? $Changelog_file
     puts "chlog: Already exists Changelog (#$Changelog_file)"
@@ -525,8 +520,4 @@ else
     puts "chlog: Auto determine log category"
     add_log_sensitive(log)
   end
-end
-
-
-# end main 
 end

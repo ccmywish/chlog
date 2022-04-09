@@ -4,6 +4,20 @@
 
 <br>
 
+## [v1.6.1](#) (2022-04-09)
+
+### Bug fixes:
+
+- Fix main doesn't run in rbenv, remove the main file check
+  ```ruby
+  __FILE__
+  # => .rbenv/versions/3.1.1/lib/ruby/gems/3.1.0/gems/chlog-1.6.1.alpha/bin/chlog
+  $0
+  # => .rbenv/versions/3.1.1/bin/chlog
+  ```
+
+<br>
+
 ## [v1.6](#) (2022-04-09)
 
 ### New features:

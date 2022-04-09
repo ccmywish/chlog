@@ -2,6 +2,10 @@
 
 ## [Unreleased](#) (2022-04-09)
 
+<br>
+
+## [v1.6](#) (2022-04-09)
+
 ### New features:
 
 - Add main file check

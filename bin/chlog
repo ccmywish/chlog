@@ -11,7 +11,10 @@
 #
 # ------------------------------------------------------
 
-CHLOG_VERSION = "1.6"
+puts __FILE__
+puts $0
+
+CHLOG_VERSION = "1.6.alpha"
 
 require 'date'
 $today = Date.today.to_s

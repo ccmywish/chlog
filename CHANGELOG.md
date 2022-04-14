@@ -2,6 +2,10 @@
 
 ## [Unreleased](#) (2022-04-15)
 
+<br>
+
+## [v1.7.0](#) (2022-04-15)
+
 ### Enhancements:
 
 - Always ask user to confirm

@@ -4,6 +4,7 @@
 
 ### Enhancements:
 
+- Always ask user to confirm
 - Try auto commit every time
 - Refactor code to ask main category first when '-g'
 - Use highline

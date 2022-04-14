@@ -398,14 +398,14 @@ end
 # Help user interactively
 #
 def ask_user_category
-  option = HL.choose do |menu|
+  category = HL.choose do |menu|
     menu.index_color  = :rgb_77bbff
     menu.prompt = "What main category?"
-    menu.choices *CATEGORY_TABLE
+    # return number!!! not string!!!
+    menu.choices(*CATEGORY_TABLE)
   end
 
-  # Fix user's view order to table index
-  option -= 1
+  option = CATEGORY_TABLE.index(category)
 
   if $sub_category.nil?
     sub = HL.ask "What sub category? Input or leave it blank"
@@ -420,24 +420,24 @@ def ask_user_category
 end
 
 
-def add_log_sensitive(log)
+def add_log_sensitive(log, with_commit_msg: true)
 
   # Be careful the when statements order
   # Match the case you want first
   option = case log
-  when /deprecat/i, /^remove/i, /^not/i                then 6 - 1
-  when /^new/i, /^add/i, /new feature/i, /^support/i   then 1 - 1
-  when /^fix/i, /repair/i, /bug/i                      then 3 - 1
-  when /compatible/i, /compatibility/i                 then 5 - 1
-  when /security/i, /secure/i, /cve/i                  then 4 - 1
-  when /feature/i, /update/i, /problem/i, /issue/i     then 2 - 1
+  when /deprecat/i, /^remove/i, /^not/i                then 6
+  when /^new/i, /^add/i, /new feature/i, /^support/i   then 1
+  when /^fix/i, /repair/i, /bug/i                      then 3
+  when /compatible/i, /compatibility/i                 then 5
+  when /security/i, /secure/i, /cve/i                  then 4
+  when /feature/i, /update/i, /problem/i, /issue/i     then 2
   else
     # Just a fake option to yield main_category -> nil
     10
   end
   
   
-  main_category = CATEGORY_TABLE[option]
+  main_category = CATEGORY_TABLE[option-1]
   if main_category.nil?
     re = 'need ask user'
   else
@@ -447,17 +447,17 @@ def add_log_sensitive(log)
     send(METHOD_HASH_TABLE[option], log)
   else
     option = ask_user_category
-    send(METHOD_HASH_TABLE[option], log)
+    send(METHOD_HASH_TABLE[option+1], log)
   end
   
-  try_auto_commit(log)
+  try_auto_commit(with_commit_msg)
 end
 
 
 #
 # Try auto commit every time
 #
-def try_auto_commit(msg = nil)
+def try_auto_commit(msg = false)
   files = `git diff --exit-code --name-only`
   files = files.split
   if (files.size == 1) && (files[0] == "CHANGELOG.md")
@@ -497,22 +497,19 @@ def add_with_git(first, second)
 
 
   if main_category.nil?
-    main_cat_to_num = %w[n 1 e 2 b 3 s 4 c 5 d 6].to_h { [_1,_1] }
-    option = main_cat_to_num[main_category]
-  else
-    option = ask_user_category
+    return add_log_sensitive(log)
   end
+
+  main_cat_to_num = %w[n 1 e 2 b 3 s 4 c 5 d 6].to_h { [_1,_1] }
+  option = main_cat_to_num[main_category]
 
   m = METHOD_HASH_TABLE[option]
   if m 
     send(m, log)
   else
-    add_log_sensitive(log)
+    # Not with commit msg, because we are just using the last commit msg
+    add_log_sensitive(log, with_commit_msg: false)
   end
-  
-  # Not with arg, because we are just using the last commit msg
-  try_auto_commit()
-
 end
 
 

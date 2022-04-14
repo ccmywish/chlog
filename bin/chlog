@@ -11,10 +11,9 @@
 #
 # ------------------------------------------------------
 
+require 'chlog'
 require 'highline'
 require 'date'
-
-CHLOG_VERSION = "1.7.0"
 
 HL = HighLine.new
 
@@ -55,7 +54,7 @@ end
 
 def help
   puts <<EOH
-chlog (v#{CHLOG_VERSION}): Help maintain the Changelog of your projects
+chlog (v#{CHLOG_GEM_VERSION}): Help maintain the Changelog of your projects
 
 usage:
 
@@ -560,7 +559,6 @@ else
       $sub_category = nil
       log = $*[0..].join(' ')
     end
-    puts "chlog: Auto determine log category"
     add_log_sensitive(log)
   end
 end

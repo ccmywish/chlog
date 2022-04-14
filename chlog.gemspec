@@ -13,14 +13,13 @@ This command line tool `chlog` helps generate and maintain the Changelog of your
 DESC
 
   s.license = "MIT"
-
-  s.authors = "ccmywish"
-  s.email = "ccmywish@qq.com"
+  s.authors  = "ccmywish"
+  s.email    = "ccmywish@qq.com"
   s.homepage = "https://github.com/ccmywish/chlog"
 
-  s.files = [
-  ]
-
+  s.add_runtime_dependency "highline", "~> 2.0"
+  
+  s.files = []
   s.executables = ["chlog"]
 
   s.metadata = {

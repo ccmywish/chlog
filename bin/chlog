@@ -3,7 +3,7 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-04-09>
+# Last modified : <2022-04-15>
 #
 # chlog:
 #
@@ -11,9 +11,15 @@
 #
 # ------------------------------------------------------
 
-CHLOG_VERSION = "1.6.1"
-
+require 'highline'
 require 'date'
+
+CHLOG_VERSION = "1.6.2"
+
+
+
+HL = HighLine.new
+
 $today = Date.today.to_s
 
 UNRELEASED_TITLE = "## [Unreleased](#) (#$today)"
@@ -56,14 +62,14 @@ chlog (v#{CHLOG_VERSION}): Help maintain the Changelog of your projects
 usage:
 
   chlog                  => Generate CHANGELOG.md in git root
-  chlog -g (-m) (--sub)  => Reuse last commit log (m category / sub category)
-  chlog (--sub) log      => Determine main category(fallback Enhancements) (/ sub category) add log  
-  chlog -n (--sub) log   => Add log to New features (/ sub category)
-  chlog -e (--sub) log   => Add log to Enhancements (/ sub category)
-  chlog -b (--sub) log   => Add log to Bug fixes    (/ sub category)
-  chlog -s (--sub) log   => Add log to Security     (/ sub category)
-  chlog -c (--sub) log   => Add log to Compatibility(/ sub category)
-  chlog -d (--sub) log   => Add log to Deprecations (/ sub category)
+  chlog -g [-m] [--sub]  => Reuse last commit log [m category/sub category]
+  chlog [--sub] log      => Determine main category(fallback Enhancements) [sub category] add log  
+  chlog -n [--sub] log   => Add log to New features [sub category]
+  chlog -e [--sub] log   => Add log to Enhancements [sub category]
+  chlog -b [--sub] log   => Add log to Bug fixes    [sub category]
+  chlog -s [--sub] log   => Add log to Security     [sub category]
+  chlog -c [--sub] log   => Add log to Compatibility[sub category]
+  chlog -d [--sub] log   => Add log to Deprecations [sub category]
   chlog -r v3.14         => Release version to v3.14
 
 EOH
@@ -145,15 +151,19 @@ def find_main_category_last_list_item_index(lns,
 end
 
 
-
-$order_table = [
-  :match_new_features?,
-  :match_enhancements?,
-  :match_bug_fixes?,
-  :match_security?,
-  :match_compatibility?,
-  :match_deprecations?
+ORDER_TABLE = %w[
+  new_features
+  enhancements
+  bug_fixes
+  security
+  compatibility
+  deprecations
 ]
+
+MATCH_TABLE = ORDER_TABLE.map do 
+  ('match_' + _1 + '?').to_sym
+end
+
 
 
 def first_lower_order_category_index(lns_array, category_order)
@@ -162,9 +172,9 @@ def first_lower_order_category_index(lns_array, category_order)
 
   nvi = next_version_index(lns_array)
   
-  while o < $order_table.size
+  while o < MATCH_TABLE.size
     lns_array[0...nvi].each_with_index do
-      if send($order_table[o], _1)
+      if send(MATCH_TABLE[o], _1)
         return _2
       end
     end
@@ -194,7 +204,7 @@ def meta_add_to_a_category(log, main_category_order, category)
   # To find the existing category line
   main_cat_i = lns[0...nvi].each_with_index do
     # Adjust to index of the order table 
-    break _2 if send($order_table[main_category_order-1], _1)
+    break _2 if send(MATCH_TABLE[main_category_order-1], _1)
   end
 
   #
@@ -406,10 +416,27 @@ def add_with_git(first, second)
   log = log[1..].join(' ')
   puts "last commit: #{log}"
 
+
+  if main_category.nil?
+    option = HL.choose do |menu|
+      menu.index_color  = :rgb_77bbff
+      menu.prompt = "What main category? Input number or leave it blank to auto determine"
+      menu.choices *[
+        'New features',
+        'Enhancements',
+        'Bug fixes',
+        'Security',
+        'Compatibility',
+        'Deprecations' ]
+    end
+  else
+    main_cat_to_num = %w[n 1 e 2 b 3 s 4 c 5 d 6].to_h { [_1,_1] }
+    option = main_cat_to_num[main_category]
+  end
+
+  
   if $sub_category.nil?
-    puts "What sub category? Input or leave it blank"
-    print '>'
-    sub = STDIN.gets.chomp
+    sub = HL.ask "What sub category? Input or leave it blank"
     case sub
     when ''
       $sub_category = nil
@@ -418,53 +445,28 @@ def add_with_git(first, second)
     end
   end
 
-  if main_category.nil?
-    puts "What main category? Input number or leave it blank to auto determine"
-    puts <<~EOC
-    ----------------
-    1. New features
-    2. Enhancements
-    3. Bug fixes
-    4. Security
-    5. Compatibility
-    6. Deprecations
-    ----------------
-    EOC
-  
-    print '>'
-    case STDIN.gets.chomp
-    when '1'      then add_to_new_features(log)
-    when '2'      then add_to_enhancements(log)
-    when '3'      then add_to_bug_fixes(log)
-    when '4'      then add_to_security(log)
-    when '5'      then add_to_compatibility(log)
-    when '6'      then add_to_deprecations(log)
-    else
-      add_log_sensitive(log)
-    end
+  ms = [1,2,3,4,5,6].zip ORDER_TABLE.map do 
+    ('add_to_' + _1).to_sym
+  end.to_h
+
+  m = ms[option]
+  if m 
+    send(m, log)
   else
-    tbl = {
-      'n' => :add_to_new_features,
-      'e' => :add_to_enhancements,
-      'b' => :add_to_bug_fixes,
-      's' => :add_to_security,
-      'c' => :add_to_compatibility,
-      'd' => :add_to_deprecations
-    }
-    send(tbl[main_category], log)
+    add_log_sensitive(log)
   end
+    
 
   # Auto commit
   files = `git diff --exit-code --name-only`
   files = files.split
   if (files.size == 1) && (files[0] == "CHANGELOG.md")
-    puts "chlog: Able to commit the new Changelog, input y/yes/blank to agree, or others to refuse"
-    print '>'
-    case STDIN.gets.chomp.downcase
+    ret = HL.ask "chlog: Able to commit the new Changelog, input y/yes/blank to agree, or others to refuse"
+    case ret
     when '', 'yes', 'y'
       system("git add #$Changelog_file && git commit -m 'Update the Changelog' ")
     else
-      "do nothing" 
+      # do nothing
     end
   end
 end

@@ -1,6 +1,11 @@
 # Changelog
 
-## [Unreleased](#) (2022-04-09)
+## [Unreleased](#) (2022-04-15)
+
+### Enhancements:
+
+- Refactor code to ask main category first
+- Use highline
 
 <br>
 

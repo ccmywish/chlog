@@ -4,7 +4,8 @@
 
 ### Enhancements:
 
-- Refactor code to ask main category first
+- Try auto commit every time
+- Refactor code to ask main category first when '-g'
 - Use highline
 
 <br>

@@ -62,15 +62,15 @@ chlog (v#{CHLOG_VERSION}): Help maintain the Changelog of your projects
 usage:
 
   chlog                  => Generate CHANGELOG.md in git root
+  chlog -r 3.14          => Release version to v3.14
   chlog -g [-m] [--sub]  => Reuse last commit log [m category/sub category]
-  chlog [--sub] log      => Determine main category(fallback Enhancements) [sub category] add log  
+  chlog [--sub] log      => Determine main category [sub category] add log  
   chlog -n [--sub] log   => Add log to New features [sub category]
   chlog -e [--sub] log   => Add log to Enhancements [sub category]
   chlog -b [--sub] log   => Add log to Bug fixes    [sub category]
   chlog -s [--sub] log   => Add log to Security     [sub category]
   chlog -c [--sub] log   => Add log to Compatibility[sub category]
   chlog -d [--sub] log   => Add log to Deprecations [sub category]
-  chlog -r v3.14         => Release version to v3.14
 
 EOH
 
@@ -160,9 +160,21 @@ ORDER_TABLE = %w[
   deprecations
 ]
 
+# New features
+# Enhancements
+# Bug fixes
+# Security
+# Compatibility
+# Deprecations
+CATEGORY_TABLE = ORDER_TABLE.map do 
+  _1.split('_').join(' ').capitalize
+end
+
 MATCH_TABLE = ORDER_TABLE.map do 
   ('match_' + _1 + '?').to_sym
 end
+
+METHOD_HASH_TABLE = ([1,2,3,4,5,6].zip ORDER_TABLE.map {|m| ('add_to_' + m).to_sym }).to_h
 
 
 
@@ -295,7 +307,9 @@ def meta_add_to_a_category(log, main_category_order, category)
     end
     File.write($Changelog_file, to_wr + lns[main_cat_i+2..].join)
   end
+  
   puts "chlog: Add log to #{category}"
+  try_auto_commit(log)
 end
 
 
@@ -353,6 +367,10 @@ def release_new_version(ver)
     exit 1
   end
 
+  if !ver.downcase.start_with?('v') and ver[0].match? /\d/
+    ver = 'v' + ver 
+  end
+
   content = get_changelog
   lns = content.lines
 
@@ -370,7 +388,35 @@ EOF
   new_version = "## [#{ver}](#) (#$today)\n"
   new_cont = header + new_version + lns[3..].join('')
   File.write($Changelog_file, new_cont)
-  puts "Release #{ver} in changelog!"
+  puts "Release #{ver} in Changelog!"
+  log = "Release #{ver}" 
+  try_auto_commit(log)
+end
+
+
+#
+# Help user interactively
+#
+def ask_user_category
+  option = HL.choose do |menu|
+    menu.index_color  = :rgb_77bbff
+    menu.prompt = "What main category?"
+    menu.choices *CATEGORY_TABLE
+  end
+
+  # Fix user's view order to table index
+  option -= 1
+
+  if $sub_category.nil?
+    sub = HL.ask "What sub category? Input or leave it blank"
+    case sub
+    when ''
+      $sub_category = nil
+    else
+      $sub_category = sub
+    end
+  end
+  return option
 end
 
 
@@ -378,21 +424,54 @@ def add_log_sensitive(log)
 
   # Be careful the when statements order
   # Match the case you want first
-  case log
-  when /deprecat/i, /^remove/i, /^not/i                then add_to_deprecations(log)
-  when /^new/i, /^add/i, /new feature/i, /^support/i   then add_to_new_features(log)
-  when /^fix/i, /repair/i, /bug/i                      then add_to_bug_fixes(log)
-  when /compatible/i, /compatibility/i                 then add_to_compatibility(log)
-  when /security/i, /secure/i, /cve/i                  then add_to_security(log)
-  when /feature/i, /update/i, /problem/i, /issue/i     then add_to_enhancements(log)
+  option = case log
+  when /deprecat/i, /^remove/i, /^not/i                then 6 - 1
+  when /^new/i, /^add/i, /new feature/i, /^support/i   then 1 - 1
+  when /^fix/i, /repair/i, /bug/i                      then 3 - 1
+  when /compatible/i, /compatibility/i                 then 5 - 1
+  when /security/i, /secure/i, /cve/i                  then 4 - 1
+  when /feature/i, /update/i, /problem/i, /issue/i     then 2 - 1
   else
-    add_to_enhancements(log)
+    # Just a fake option to yield main_category -> nil
+    10
+  end
+  
+  
+  main_category = CATEGORY_TABLE[option]
+  if main_category.nil?
+    re = 'need ask user'
+  else
+    re = HL.ask "Add to '#{main_category}'? Enter to say yes, others no"
+  end
+  if re == ''
+    send(METHOD_HASH_TABLE[option], log)
+  else
+    option = ask_user_category
+    send(METHOD_HASH_TABLE[option], log)
+  end
+  
+  try_auto_commit(log)
+end
+
+
+#
+# Try auto commit every time
+#
+def try_auto_commit(msg = nil)
+  files = `git diff --exit-code --name-only`
+  files = files.split
+  if (files.size == 1) && (files[0] == "CHANGELOG.md")
+    ret = HL.ask "chlog: Able to commit the Changelog, blank to agree, others to refuse"
+    if ret == ""
+      msg = msg ? nil : ": #{msg}"
+      system("git add #$Changelog_file && git commit -m 'Update the Changelog#{msg}' ")
+    end
   end
 end
 
 
 #
-# reuse git commit log
+# Reuse git commit log
 #
 def add_with_git(first, second)
 
@@ -418,57 +497,22 @@ def add_with_git(first, second)
 
 
   if main_category.nil?
-    option = HL.choose do |menu|
-      menu.index_color  = :rgb_77bbff
-      menu.prompt = "What main category? Input number or leave it blank to auto determine"
-      menu.choices *[
-        'New features',
-        'Enhancements',
-        'Bug fixes',
-        'Security',
-        'Compatibility',
-        'Deprecations' ]
-    end
-  else
     main_cat_to_num = %w[n 1 e 2 b 3 s 4 c 5 d 6].to_h { [_1,_1] }
     option = main_cat_to_num[main_category]
+  else
+    option = ask_user_category
   end
 
-  
-  if $sub_category.nil?
-    sub = HL.ask "What sub category? Input or leave it blank"
-    case sub
-    when ''
-      $sub_category = nil
-    else
-      $sub_category = sub
-    end
-  end
-
-  ms = [1,2,3,4,5,6].zip ORDER_TABLE.map do 
-    ('add_to_' + _1).to_sym
-  end.to_h
-
-  m = ms[option]
+  m = METHOD_HASH_TABLE[option]
   if m 
     send(m, log)
   else
     add_log_sensitive(log)
   end
-    
+  
+  # Not with arg, because we are just using the last commit msg
+  try_auto_commit()
 
-  # Auto commit
-  files = `git diff --exit-code --name-only`
-  files = files.split
-  if (files.size == 1) && (files[0] == "CHANGELOG.md")
-    ret = HL.ask "chlog: Able to commit the new Changelog, input y/yes/blank to agree, or others to refuse"
-    case ret
-    when '', 'yes', 'y'
-      system("git add #$Changelog_file && git commit -m 'Update the Changelog' ")
-    else
-      # do nothing
-    end
-  end
 end
 
 
@@ -497,6 +541,8 @@ else
 end
 
 
+begin
+
 case action
 when "-h", "--help" then help()
 when "-n" then add_to_new_features(log)
@@ -522,4 +568,7 @@ else
     puts "chlog: Auto determine log category"
     add_log_sensitive(log)
   end
+end
+
+rescue Interrupt
 end

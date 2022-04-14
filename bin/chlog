@@ -14,9 +14,7 @@
 require 'highline'
 require 'date'
 
-CHLOG_VERSION = "1.6.2"
-
-
+CHLOG_VERSION = "1.7.0"
 
 HL = HighLine.new
 

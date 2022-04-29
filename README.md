@@ -43,28 +43,28 @@ Notice:
 $ chlog
 # Generate CHANGELOG.md in your git root or do nothing if already exists
 
-$ chlog (--sub) log      
+$ chlog [--sub] log      
 # -> Auto determine main category(fallback Enhancements) (/ sub category) add log 
 
-$ chlog -g (-m) (--sub)
+$ chlog -g [-m] [--sub]
 # -> Reuse last commit log (m category / sub category)
 
-$ chlog -n (--sub) log
+$ chlog -n [--sub] log
 # -> Add log to 'New features'/'sub categories' 
 
-$ chlog -e (--sub) log
+$ chlog -e [--sub] log
 # -> Add log to 'Enhancements'/'sub categories' 
 
-$ chlog -b (--sub) log
+$ chlog -b [--sub] log
 # -> Add log to 'Bug fixes'/'sub categories' 
 
-$ chlog -s (--sub) log
+$ chlog -s [--sub] log
 # -> Add log to 'Security'/'sub categories' 
 
-$ chlog -c (--sub) log
+$ chlog -c [--sub] log
 # -> Add log to 'Compatibility'/'sub categories' 
 
-$ chlog -d (--sub) log
+$ chlog -d [--sub] log
 # -> Add log to 'Deprecations'/'sub categories' 
 
 $ chlog -r version

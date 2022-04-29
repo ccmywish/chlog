@@ -1,18 +1,17 @@
+require 'date'
 require_relative 'lib/chlog'
 
 Gem::Specification.new do |s|
-  s.name = "chlog"
+  s.name    = "chlog"
   s.version = CHLOG_GEM_VERSION
-  require 'date'
-  s.date = Date.today.to_s
-  
+  s.date    = Date.today.to_s
   s.summary = "chlog: help maintain Changelog"
 
   s.description = <<DESC
 This command line tool `chlog` helps generate and maintain the Changelog of your projects.
 DESC
 
-  s.license = "MIT"
+  s.license  = "MIT"
   s.authors  = "ccmywish"
   s.email    = "ccmywish@qq.com"
   s.homepage = "https://github.com/ccmywish/chlog"

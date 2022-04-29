@@ -3,7 +3,7 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-04-15>
+# Last modified : <2022-04-30>
 #
 # chlog:
 #
@@ -405,7 +405,7 @@ def ask_user_category
   option = CATEGORY_TABLE.index(category)
 
   if $sub_category.nil?
-    sub = HL.ask "What sub category? Input or leave it blank"
+    sub = HL.ask "What sub category? [NIL/sub]"
     case sub
     when ''
       $sub_category = nil
@@ -438,9 +438,9 @@ def add_log_sensitive(log, with_commit_msg: true)
   if main_category.nil?
     re = 'need ask user'
   else
-    re = HL.ask "Add to '#{main_category}'? Enter to say yes, others no"
+    re = HL.ask "Add to '#{main_category}'? [Y/n]"
   end
-  if re == ''
+  if re == '' || re.downcase == 'y' || re.downcase == 'yes'
     send(METHOD_HASH_TABLE[option], log)
   else
     option = ask_user_category
@@ -458,8 +458,8 @@ def try_auto_commit(msg = false)
   files = `git diff --exit-code --name-only`
   files = files.split
   if (files.size == 1) && (files[0] == "CHANGELOG.md")
-    ret = HL.ask "chlog: Able to commit the Changelog, blank to agree, others to refuse"
-    if ret == ""
+    re = HL.ask "chlog: commit the Changelog? [Y/n]"
+    if re == "" || re.downcase == 'y' || re.downcase == 'yes'
       msg = msg ? nil : ": #{msg}"
       system("git add #$Changelog_file && git commit -m 'Update the Changelog#{msg}' ")
     end

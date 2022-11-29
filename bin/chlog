@@ -3,7 +3,7 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-04-30>
+# Last modified : <2022-11-29>
 #
 # chlog:
 #
@@ -60,7 +60,7 @@ usage:
 
   chlog                  => Generate CHANGELOG.md in git root
   chlog -r 3.14          => Release version to v3.14
-  chlog -g [-m] [--sub]  => Reuse last commit log [m category/sub category]
+  chlog -g [-m] [--sub]  => Reuse last Git log [main category/sub category]
   chlog [--sub] log      => Determine main category [sub category] add log  
   chlog -n [--sub] log   => Add log to New features [sub category]
   chlog -e [--sub] log   => Add log to Enhancements [sub category]
@@ -461,7 +461,8 @@ def try_auto_commit(msg = false)
     re = HL.ask "chlog: commit the Changelog? [Y/n]"
     if re == "" || re.downcase == 'y' || re.downcase == 'yes'
       msg = msg ? nil : ": #{msg}"
-      system("git add #$Changelog_file && git commit -m 'Update the Changelog#{msg}' ")
+      system "git add #$Changelog_file"
+      system "git commit -m 'Update the Changelog#{msg}' "
     end
   end
 end

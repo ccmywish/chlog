@@ -4,6 +4,14 @@
 
 <br>
 
+## [v1.7.3](#) (2022-11-29)
+
+### Enhancements:
+
+- Check whether is git dir
+
+<br>
+
 ## [v1.7.2](#) (2022-11-29)
 
 ### Bug fixes:

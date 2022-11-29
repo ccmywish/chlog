@@ -454,15 +454,21 @@ end
 #
 # Try auto commit every time
 #
-def try_auto_commit(msg = false)
+def try_auto_commit(msg = nil)
+
   files = `git diff --exit-code --name-only`
   files = files.split
   if (files.size == 1) && (files[0] == "CHANGELOG.md")
     re = HL.ask "chlog: commit the Changelog? [Y/n]"
     if re == "" || re.downcase == 'y' || re.downcase == 'yes'
-      msg = msg ? nil : ": #{msg}"
+      
       system "git add #$Changelog_file"
-      system "git commit -m 'Update the Changelog#{msg}' "
+      # Can't merge the git add op here, because 'system' only treat them
+      # as one command integrally
+      system <<~COMMAND
+        git commit -m "Update the Changelog with info: #{msg}"
+      COMMAND
+    
     end
   end
 end

@@ -1,6 +1,14 @@
 # Changelog
 
-## [Unreleased](#) (2022-04-15)
+## [Unreleased](#) (2022-11-29)
+
+<br>
+
+## [v1.7.2](#) (2022-11-29)
+
+### Bug fixes:
+
+- Fix auto commit bug on windows
 
 <br>
 

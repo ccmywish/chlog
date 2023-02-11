@@ -16,9 +16,6 @@ require 'date'
 require 'open3'
 
 
-
-
-
 module Chlog
 end
 
@@ -63,7 +60,6 @@ class Chlog::CliHandler
     when "-c" then add_to_compatibility(log)
     when "-d" then add_to_deprecations(log)
     when "-r" then release_new_version($*[1])
-    when "-lg" then add_with_last_git($*[1], $*[2])
     else
       if action =~ /^-[^-]*$/
         puts "chlog: Unknown option!"
@@ -94,7 +90,7 @@ class Chlog::CliHandler
 
   Add log:
 
-    chlog [-<main> category] [--<sub> category] log
+    chlog [-<main> category] [--<sub> category] <log>
 
   Main Category:
     -n    Add log to New features
@@ -103,11 +99,6 @@ class Chlog::CliHandler
     -s    Add log to Security
     -c    Add log to Compatibility
     -d    Add log to Deprecations
-
-  More usages:
-
-    chlog -lg [-m] [--sub]  Reuse last Git log
-    chlog [--sub] <log>     Auto determine main category
 
 EOH
 
@@ -521,48 +512,6 @@ def try_auto_commit(msg = nil)
   end
 end
 
-
-#
-# Reuse git commit log
-#
-def add_with_last_git(first, second)
-
-  main_category = nil
-
-  if first =~ /^-([nebscd])$/
-    main_category = $1
-  elsif first =~ /^--(.*)/
-    $sub_category = $1
-  end
-
-  if second =~ /^-([nebscd])$/
-    main_category = $1
-  elsif second =~ /^--(.*)/
-    $sub_category = $1
-  end
-
-
-  gitlog = `git log --oneline -n 1`
-  log = gitlog.split(' ')
-  log = log[1..].join(' ')
-  puts "last commit: #{log}"
-
-
-  if main_category.nil?
-    return add_log_sensitive(log)
-  end
-
-  main_cat_to_num = %w[n 1 e 2 b 3 s 4 c 5 d 6].to_h { [_1,_1] }
-  option = main_cat_to_num[main_category]
-
-  m = METHOD_HASH_TABLE[option]
-  if m
-    send(m, log)
-  else
-    # Not with commit msg, because we are just using the last commit msg
-    add_log_sensitive(log, with_commit_msg: false)
-  end
-end
 
 
 #############

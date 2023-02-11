@@ -3,7 +3,7 @@ require_relative 'lib/chlog'
 
 Gem::Specification.new do |s|
   s.name    = "chlog"
-  s.version = CHLOG_GEM_VERSION
+  s.version = Chlog::GEM_VERSION
   s.date    = Date.today.to_s
   s.summary = "chlog: help maintain Changelog"
 

@@ -3,12 +3,11 @@
 # File          : chlog.rb
 # Authors       : ccmywish <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2022-11-29>
+# Last modified : <2023-02-12>
 #
 # chlog:
 #
 #   Maintain your project's Changelog on the cli.
-#
 # ------------------------------------------------------
 
 require 'chlog'
@@ -16,74 +15,111 @@ require 'highline'
 require 'date'
 require 'open3'
 
-HL = HighLine.new
-
-$today = Date.today.to_s
-
-UNRELEASED_TITLE = "## [Unreleased](#) (#$today)"
-
-CHLOG_TEMPLATE = <<EOT
-# Changelog
-
-#{UNRELEASED_TITLE}
-
-<br>
-
-## [Initialize](#) (#$today)
-
-<br>
-
-<hr>
-
-This Changelog is maintained with [chlog](https://github.com/ccmywish/chlog)
-
-EOT
 
 
-# Prevent current directory is not git directory
-Open3.popen3("git rev-parse --show-toplevel") do |i, o, err, t|
-  if err.read.include?("fatal: not a git repository")
-    puts "chlog: Not a git directory!"
-    exit
-  else
-    $Changelog_file = `git rev-parse --show-toplevel`.chomp + '/CHANGELOG.md'
-  end
+
+
+module Chlog
 end
 
 
+class Chlog::CliHandler
 
-def get_changelog
-  file = $Changelog_file
-  if File.exists? file
-    return File.read file
-  else
-    puts "chlog: Auto generate #$Changelog_file"
-    File.write(file, CHLOG_TEMPLATE)
-    return File.read file
+
+  def initialize(args)
+
+    if args.size == 0
+      help || exit
+    end
+
+    action = args[0]
+    if args[1] =~ /--(.*)/
+      puts "-> DEBUG: #$1"
+      $sub_category = $1
+      log = args[2..].join(' ')
+    else
+      $sub_category = nil
+      log = args[1..].join(' ')
+    end
+
+
+    # Prevent current directory is not git directory
+    Open3.popen3("git rev-parse --show-toplevel") do |i, o, err, t|
+      if err.read.include?("fatal: not a git repository")
+        puts "chlog: Not a git directory!"
+        exit
+      else
+        $Changelog_file = `git rev-parse --show-toplevel`.chomp + '/CHANGELOG.md'
+      end
+    end
+
+    case action
+    when "-h", "--help" then help()
+    when "-g" then generate_changelog()
+    when "-n" then add_to_new_features(log)
+    when "-e" then add_to_enhancements(log)
+    when "-b" then add_to_bug_fixes(log)
+    when "-s" then add_to_security(log)
+    when "-c" then add_to_compatibility(log)
+    when "-d" then add_to_deprecations(log)
+    when "-r" then release_new_version($*[1])
+    when "-lg" then add_with_last_git($*[1], $*[2])
+    else
+      if action =~ /^-[^-]*$/
+        puts "chlog: Unknown option!"
+        exit 1
+      else
+        if $*[0] =~ /^--(.*)/
+          $sub_category = $1
+          log = $*[1..].join(' ')
+        else
+          $sub_category = nil
+          log = $*[0..].join(' ')
+        end
+      add_log_sensitive(log)
+      end
+    end
+
   end
-end
 
 
-def help
-  puts <<EOH
-chlog (v#{CHLOG_GEM_VERSION}): Help maintain the Changelog of your projects
+  def help
+    puts <<EOH
+  chlog (v#{CHLOG_GEM_VERSION}): Help maintain the Changelog of your projects
 
-usage:
+  Usage:
 
-  chlog                  => Generate CHANGELOG.md in git root
-  chlog -r 3.14          => Release version to v3.14
-  chlog -g [-m] [--sub]  => Reuse last Git log [main category/sub category]
-  chlog [--sub] log      => Determine main category [sub category] add log  
-  chlog -n [--sub] log   => Add log to New features [sub category]
-  chlog -e [--sub] log   => Add log to Enhancements [sub category]
-  chlog -b [--sub] log   => Add log to Bug fixes    [sub category]
-  chlog -s [--sub] log   => Add log to Security     [sub category]
-  chlog -c [--sub] log   => Add log to Compatibility[sub category]
-  chlog -d [--sub] log   => Add log to Deprecations [sub category]
+    chlog -g                Generate CHANGELOG.md in git root
+    chlog -r <3.14>         Release version to v3.14
+
+  Add log:
+
+    chlog [-<main> category] [--<sub> category] log
+
+  Main Category:
+    -n    Add log to New features
+    -e    Add log to Enhancements
+    -b    Add log to Bug fixes
+    -s    Add log to Security
+    -c    Add log to Compatibility
+    -d    Add log to Deprecations
+
+  More usages:
+
+    chlog -lg [-m] [--sub]  Reuse last Git log
+    chlog [--sub] <log>     Auto determine main category
 
 EOH
 
+  end
+
 end
+
+
+
+
+
+
 
 def match_unreleased?(str)
   str =~ /^## \[Unreleased\]\(.*\) \(\d{4}-\d\d-\d\d\)/
@@ -91,7 +127,7 @@ end
 
 def match_unreleased_fail!(str)
   unless match_unreleased?(str)
-    puts "chlog: Unmathed format with chlog" 
+    puts "chlog: Unmatched format with chlog"
     # "#{lns[1][1..]}"
     puts "       Unreleased version must be the third line.", ""
     exit -1
@@ -130,7 +166,7 @@ end
 
 def next_category_index(lns_array)
   nci = lns_array[3...nvi].each_with_index {break _2 if _1.start_with?("### ") }
-  
+
   # The not match return value is not nil!! But an array!!
   if nci.is_a(Integer)
     nci += 3
@@ -142,18 +178,18 @@ end
 
 #
 #  ### New features:
-#   
+#
 #  - xaaaaa
 #  - xbbbbb
 #  - xccccc    [-> this]
 #
-def find_main_category_last_list_item_index(lns, 
-                                            main_cat_index, 
+def find_main_category_last_list_item_index(lns,
+                                            main_cat_index,
                                             first_lower_order_category_index)
   mci = main_cat_index
   nci = first_lower_order_category_index
-  
-  list_i = lns[mci+2..nci].each_with_index do 
+
+  list_i = lns[mci+2..nci].each_with_index do
     break _2 if _1  !~  /^- .*/
   end
   list_i += mci+2 - 1
@@ -175,11 +211,11 @@ ORDER_TABLE = %w[
 # Security
 # Compatibility
 # Deprecations
-CATEGORY_TABLE = ORDER_TABLE.map do 
+CATEGORY_TABLE = ORDER_TABLE.map do
   _1.split('_').join(' ').capitalize
 end
 
-MATCH_TABLE = ORDER_TABLE.map do 
+MATCH_TABLE = ORDER_TABLE.map do
   ('match_' + _1 + '?').to_sym
 end
 
@@ -192,7 +228,7 @@ def first_lower_order_category_index(lns_array, category_order)
   o = category_order
 
   nvi = next_version_index(lns_array)
-  
+
   while o < MATCH_TABLE.size
     lns_array[0...nvi].each_with_index do
       if send(MATCH_TABLE[o], _1)
@@ -202,7 +238,7 @@ def first_lower_order_category_index(lns_array, category_order)
     o += 1
   end
 
-  # Next version above 
+  # Next version above
   return (nvi - 2)
 end
 
@@ -211,9 +247,9 @@ end
 #
 # A meta function: do the real work other 6 functions delegate
 #
-# This function detect the main category, and then handle the 
+# This function detect the main category, and then handle the
 # sub category.
-# 
+#
 def meta_add_to_a_category(log, main_category_order, category)
 
   content = get_changelog
@@ -224,7 +260,7 @@ def meta_add_to_a_category(log, main_category_order, category)
   nvi = next_version_index(lns)
   # To find the existing category line
   main_cat_i = lns[0...nvi].each_with_index do
-    # Adjust to index of the order table 
+    # Adjust to index of the order table
     break _2 if send(MATCH_TABLE[main_category_order-1], _1)
   end
 
@@ -247,51 +283,51 @@ def meta_add_to_a_category(log, main_category_order, category)
 
     ########################################
     if $sub_category
-    
+
     # Because the main category not exists,
     #   nor does the sub category
     #
-    sub_cat_i = f_l_o_c_i 
+    sub_cat_i = f_l_o_c_i
     to_wr = lns[0...sub_cat_i].join + "### #{category}:\n\n" + "**#{$sub_category}**\n\n" + '  - ' + log + "\n\n"
     File.write($Changelog_file, to_wr + lns[sub_cat_i..].join)
-    
+
     puts "chlog: Add log to #{category}/#{$sub_category}"
-    return 
+    return
     end # end of if $sub_category
     ########################################
 
 
-    # situation: no sub category 
-    
+    # situation: no sub category
+
     # Not need adjust to the index of the order table
     log_loc = f_l_o_c_i
     puts "chlog: Add '#{category}' category"
     to_wr = lns[0...(log_loc)].join + "### #{category}:\n\n" + '- ' + log + "\n"
     File.write($Changelog_file, to_wr + lns[log_loc-1..].join)
-  
+
   else
   ################################################################################
   # The main category exists
   ################################################################################
-    
+
 
     ########################################
     if $sub_category
-    
+
     # from first list item to next main cat
     #   search if sub cat already exists
-    sub_cat_i = lns[main_cat_i+2...f_l_o_c_i].each_with_index do 
+    sub_cat_i = lns[main_cat_i+2...f_l_o_c_i].each_with_index do
       break _2 if _1 =~ /^\*\*#{$sub_category}\*\*/
     end
 
     if !sub_cat_i.is_a?(Integer)
     # the sub category not exists
-    
-      sub_cat_i = 2 + find_main_category_last_list_item_index(lns,main_cat_i,f_l_o_c_i) 
+
+      sub_cat_i = 2 + find_main_category_last_list_item_index(lns,main_cat_i,f_l_o_c_i)
       to_wr = lns[0...sub_cat_i].join + "**#{$sub_category}**\n\n" + '  - ' + log + "\n\n"
       File.write($Changelog_file, to_wr + lns[sub_cat_i..].join)
     else
-    # the sub category exists  
+    # the sub category exists
 
       sub_cat_i +=  main_cat_i+2
       to_wr = lns[0..sub_cat_i+1].join + '  - ' + log + "\n"
@@ -299,16 +335,16 @@ def meta_add_to_a_category(log, main_category_order, category)
     end
 
     puts "chlog: Add log to #{category}/#{$sub_category}"
-    return 
+    return
     end # end of if $sub_category
     ########################################
 
 
 
-    # situation: no sub category 
+    # situation: no sub category
 
     to_wr = lns[0..main_cat_i+1].join + '- ' + log + "\n"
-    
+
     # main category list should be separated with
     # sub category
     if lns[main_cat_i+2] =~ /\*\*.*/
@@ -316,7 +352,7 @@ def meta_add_to_a_category(log, main_category_order, category)
     end
     File.write($Changelog_file, to_wr + lns[main_cat_i+2..].join)
   end
-  
+
   puts "chlog: Add log to #{category}"
   try_auto_commit(log)
 end
@@ -377,7 +413,7 @@ def release_new_version(ver)
   end
 
   if !ver.downcase.start_with?('v') and ver[0].match? /\d/
-    ver = 'v' + ver 
+    ver = 'v' + ver
   end
 
   content = get_changelog
@@ -388,17 +424,17 @@ def release_new_version(ver)
   header = <<EOF
 # Changelog
 
-## [Unreleased](#) (#$today)
+## [Unreleased](#) (#{TODAY})
 
 <br>
 
 EOF
-  
-  new_version = "## [#{ver}](#) (#$today)\n"
+
+  new_version = "## [#{ver}](#) (#{TODAY})\n"
   new_cont = header + new_version + lns[3..].join('')
   File.write($Changelog_file, new_cont)
   puts "Release #{ver} in Changelog!"
-  log = "Release #{ver}" 
+  log = "Release #{ver}"
   try_auto_commit(log)
 end
 
@@ -444,8 +480,8 @@ def add_log_sensitive(log, with_commit_msg: true)
     # Just a fake option to yield main_category -> nil
     10
   end
-  
-  
+
+
   main_category = CATEGORY_TABLE[option-1]
   if main_category.nil?
     re = 'need ask user'
@@ -458,7 +494,7 @@ def add_log_sensitive(log, with_commit_msg: true)
     option = ask_user_category
     send(METHOD_HASH_TABLE[option+1], log)
   end
-  
+
   try_auto_commit(with_commit_msg)
 end
 
@@ -473,14 +509,14 @@ def try_auto_commit(msg = nil)
   if (files.size == 1) && (files[0] == "CHANGELOG.md")
     re = HL.ask "chlog: commit the Changelog? [Y/n]"
     if re == "" || re.downcase == 'y' || re.downcase == 'yes'
-      
+
       system "git add #$Changelog_file"
       # Can't merge the git add op here, because 'system' only treat them
       # as one command integrally
       system <<~COMMAND
         git commit -m "Update the Changelog with info: #{msg}"
       COMMAND
-    
+
     end
   end
 end
@@ -489,7 +525,7 @@ end
 #
 # Reuse git commit log
 #
-def add_with_git(first, second)
+def add_with_last_git(first, second)
 
   main_category = nil
 
@@ -520,7 +556,7 @@ def add_with_git(first, second)
   option = main_cat_to_num[main_category]
 
   m = METHOD_HASH_TABLE[option]
-  if m 
+  if m
     send(m, log)
   else
     # Not with commit msg, because we are just using the last commit msg
@@ -533,54 +569,4 @@ end
 #    main
 #############
 
-if $*.size == 0
-  if File.exists? $Changelog_file
-    puts "chlog: Already exists Changelog (#$Changelog_file)"
-    puts "       Use chlog -h to see options"
-  else
-    get_changelog
-  end
-  exit
-end
-
-action = $*[0]
-if $*[1] =~ /--(.*)/
-  puts "-> DEBUG: #$1"
-  $sub_category = $1 
-  log = $*[2..].join(' ')
-else
-  $sub_category = nil
-  log = $*[1..].join(' ')
-end
-
-
-begin
-
-case action
-when "-h", "--help" then help()
-when "-n" then add_to_new_features(log)
-when "-e" then add_to_enhancements(log)
-when "-b" then add_to_bug_fixes(log)
-when "-s" then add_to_security(log)
-when "-c" then add_to_compatibility(log)
-when "-d" then add_to_deprecations(log)
-when "-r" then release_new_version($*[1])
-when "-g" then add_with_git($*[1], $*[2])
-else
-  if action =~ /^-[^-]*$/
-    puts "chlog: Unknown option!"
-    exit 1
-  else
-    if $*[0] =~ /^--(.*)/
-      $sub_category = $1 
-      log = $*[1..].join(' ')
-    else
-      $sub_category = nil
-      log = $*[0..].join(' ')
-    end
-    add_log_sensitive(log)
-  end
-end
-
-rescue Interrupt
-end
+cli = Chlog::CliHandler.new $*

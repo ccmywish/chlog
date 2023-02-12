@@ -17,13 +17,13 @@ class Chlog::CliHandler
   def initialize(args)
 
     if args.size == 0
-      help || exit
+      help or exit
     end
 
     action = args[0]
 
     case action
-    when "-h", "--help" then help || exit end
+    when "-h", "--help" then help or exit end
 
     logger = Chlog::Logger.new
 
@@ -365,8 +365,7 @@ end
   # Release a version
   def release_new_version(ver)
     if ver.nil?
-      puts "chlog: No version supplied!" || puts
-      abort "Use chlog -r <version>!"
+      puts "chlog: No version supplied!"; puts; abort "Use chlog -r <version>!"
     end
 
     if !ver.downcase.start_with?('v') and ver[0].match? /\d/

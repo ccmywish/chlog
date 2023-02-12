@@ -52,7 +52,7 @@ class Chlog::CliHandler
 
   def help
     puts <<EOH
-  chlog (v#{CHLOG_GEM_VERSION}): Help maintain the Changelog of your projects
+  chlog (v#{Chlog::GEM_VERSION}): Help maintain the Changelog of your projects
 
   Usage:
 
@@ -132,13 +132,13 @@ class Chlog::Logger
     else nil end
   end
 
-  #
-  #  ### New features:
-  #
-  #  - xaaaaa
-  #  - xbbbbb
-  #  - xccccc    [-> this]
-  #
+=begin
+### New features:
+
+- xaaaaa
+- xbbbbb
+- xccccc    [-> this]
+=end
   def find_main_category_last_list_item_index(lns,
                                               main_cat_index,
                                               first_lower_order_category_index)
@@ -153,12 +153,8 @@ class Chlog::Logger
 
 
   LIST__Feature = %w[
-    new_features
-    enhancements
-    bug_fixes
-    security
-    compatibility
-    deprecations
+    new_features  enhancements    bug_fixes
+    security      compatibility  deprecations
   ]
 
   # New features
@@ -198,10 +194,9 @@ class Chlog::Logger
       "-s" => "security",     "-c" => "compatibility", "-d" => "deprecations"
     }
 =end
-
     action_table = options.chars.map do |op|
       '-' + op
-    end.zip(LIST__Feature)
+    end.zip(LIST__Feature).to_h
 
     public_send "add_to_#{action_table[action]}"
   end
@@ -215,9 +210,7 @@ class Chlog::Logger
 
     while o < LIST__Match_Method.size
       lns_array[0...nvi].each_with_index do
-        if send(LIST__Match_Method[o], _1)
-          return _2
-        end
+        return _2 if send(LIST__Match_Method[o], _1)
       end
       o += 1
     end
@@ -225,7 +218,6 @@ class Chlog::Logger
     # Next version above
     return (nvi - 2)
   end
-
 
 
   # A meta function: do the real work other 6 functions delegate
@@ -423,40 +415,7 @@ EOF
     return option
   end
 
-
-  def add_log_sensitive(log, with_commit_msg: true)
-
-  # Be careful the when statements order
-  # Match the case you want first
-  option = case log
-  when /deprecat/i, /^remove/i, /^not/i                then 6
-  when /^new/i, /^add/i, /new feature/i, /^support/i   then 1
-  when /^fix/i, /repair/i, /bug/i                      then 3
-  when /compatible/i, /compatibility/i                 then 5
-  when /security/i, /secure/i, /cve/i                  then 4
-  when /feature/i, /update/i, /problem/i, /issue/i     then 2
-  else
-    # Just a fake option to yield main_category -> nil
-    10
-  end
-
-
-  main_category = LIST__Main_Category[option-1]
-  if main_category.nil?
-    re = 'need ask user'
-  else
-    re = @highline.ask "Add to '#{main_category}'? [Y/n]"
-  end
-  if re == '' || re.downcase == 'y' || re.downcase == 'yes'
-    send(HASH__Order_To_AddTo_Method[option], log)
-  else
-    option = ask_user_category
-    send(HASH__Order_To_AddTo_Method[option+1], log)
-  end
 end
-
-
-
 
 #############
 #    main

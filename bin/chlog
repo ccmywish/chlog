@@ -11,17 +11,8 @@
 # ------------------------------------------------------
 
 require 'chlog'
-require 'highline'
-require 'date'
-require 'open3'
-
-
-module Chlog
-end
-
 
 class Chlog::CliHandler
-
 
   def initialize(args)
 
@@ -30,53 +21,37 @@ class Chlog::CliHandler
     end
 
     action = args[0]
-    if args[1] =~ /--(.*)/
-      puts "-> DEBUG: #$1"
-      $sub_category = $1
-      log = args[2..].join(' ')
-    else
-      $sub_category = nil
-      log = args[1..].join(' ')
-    end
-
-
-    # Prevent current directory is not git directory
-    Open3.popen3("git rev-parse --show-toplevel") do |i, o, err, t|
-      if err.read.include?("fatal: not a git repository")
-        puts "chlog: Not a git directory!"
-        exit
-      else
-        $Changelog_file = `git rev-parse --show-toplevel`.chomp + '/CHANGELOG.md'
-      end
-    end
 
     case action
-    when "-h", "--help" then help()
-    when "-g" then generate_changelog()
-    when "-r" then release_new_version($*[1])
+    when "-h", "--help" then help || exit end
 
-    when "-n" then add_to_new_features(log)
-    when "-e" then add_to_enhancements(log)
-    when "-b" then add_to_bug_fixes(log)
-    when "-s" then add_to_security(log)
-    when "-c" then add_to_compatibility(log)
-    when "-d" then add_to_deprecations(log)
-    else
-      if action =~ /^-[^-]*$/
-        puts "chlog: Unknown option!"
-        exit 1
-      else
-        if $*[0] =~ /^--(.*)/
-          $sub_category = $1
-          log = $*[1..].join(' ')
-        else
-          $sub_category = nil
-          log = $*[0..].join(' ')
-        end
-      add_log_sensitive(log)
-      end
+    logger = Chlog::Logger.new
+
+    case action
+    when "-g" then logger.generate_changelog()
+    when "-r" then logger.release_new_version(args[1])
     end
 
+    if args[1] =~ /^--(.*)/
+      logger.sub_category = $1
+      logger.log = args[2..].join(' ')
+    else
+      logger.sub_category = nil
+      logger.log = args[1..].join(' ')
+    end
+
+    action_table = {
+      "-n" => "new_features", "-e" => "enhancements",  "-b" => "bug_fixes",
+      "-s" => "security",     "-c" => "compatibility", "-d" => "deprecations"
+    }
+
+    case action
+    when /-[nebscd]/
+      logger.public_send "add_to_#{action_table[action]}"
+    else
+      # action =~ /^-[^-]*$/
+      abort "chlog: Unknown option!"
+    end
   end
 
 
@@ -91,7 +66,7 @@ class Chlog::CliHandler
 
   Add log:
 
-    chlog [-<main> category] [--<sub> category] <log>
+    chlog <-main category> [--sub category] <log>
 
   Main Category:
     -n    Add log to New features
@@ -109,193 +84,193 @@ end
 
 
 
+class Chlog::Logger
 
-
-
-
-def match_unreleased?(str)
-  str =~ /^## \[Unreleased\]\(.*\) \(\d{4}-\d\d-\d\d\)/
-end
-
-def match_unreleased_fail!(str)
-  unless match_unreleased?(str)
-    puts "chlog: Unmatched format with chlog"
-    # "#{lns[1][1..]}"
-    puts "       Unreleased version must be the third line.", ""
-    exit -1
+  def match_unreleased?(str)
+    str =~ /^## \[Unreleased\]\(.*\) \(\d{4}-\d\d-\d\d\)/
   end
-end
 
-def match_new_features?(str)
-  str =~ /^### New features:/
-end
-
-def match_enhancements?(str)
-  str =~ /^### Enhancements:/
-end
-
-def match_bug_fixes?(str)
-  str =~ /^### Bug fixes:/
-end
-
-def match_security?(str)
-  str =~ /^### Security:/
-end
-
-def match_compatibility?(str)
-  str =~ /^### Compatibility:/
-end
-
-def match_deprecations?(str)
-  str =~ /^### Deprecations:/
-end
-
-
-def next_version_index(lns_array)
-  nvi = lns_array[3..].each_with_index {break _2 if _1.start_with?("## [") }
-  nvi += 3
-end
-
-def next_category_index(lns_array)
-  nci = lns_array[3...nvi].each_with_index {break _2 if _1.start_with?("### ") }
-
-  # The not match return value is not nil!! But an array!!
-  if nci.is_a(Integer)
-    nci += 3
-  else
-    nil
-  end
-end
-
-
-#
-#  ### New features:
-#
-#  - xaaaaa
-#  - xbbbbb
-#  - xccccc    [-> this]
-#
-def find_main_category_last_list_item_index(lns,
-                                            main_cat_index,
-                                            first_lower_order_category_index)
-  mci = main_cat_index
-  nci = first_lower_order_category_index
-
-  list_i = lns[mci+2..nci].each_with_index do
-    break _2 if _1  !~  /^- .*/
-  end
-  list_i += mci+2 - 1
-end
-
-
-ORDER_TABLE = %w[
-  new_features
-  enhancements
-  bug_fixes
-  security
-  compatibility
-  deprecations
-]
-
-# New features
-# Enhancements
-# Bug fixes
-# Security
-# Compatibility
-# Deprecations
-CATEGORY_TABLE = ORDER_TABLE.map do
-  _1.split('_').join(' ').capitalize
-end
-
-MATCH_TABLE = ORDER_TABLE.map do
-  ('match_' + _1 + '?').to_sym
-end
-
-METHOD_HASH_TABLE = ([1,2,3,4,5,6].zip ORDER_TABLE.map {|m| ('add_to_' + m).to_sym }).to_h
-
-
-
-def first_lower_order_category_index(lns_array, category_order)
-
-  o = category_order
-
-  nvi = next_version_index(lns_array)
-
-  while o < MATCH_TABLE.size
-    lns_array[0...nvi].each_with_index do
-      if send(MATCH_TABLE[o], _1)
-        return _2
-      end
+  def match_unreleased_fail!(str)
+    unless match_unreleased?(str)
+      puts  "chlog: Unmatched format with chlog"
+      puts
+      # "#{lns[1][1..]}"
+      abort "Unreleased version must be the third line"
     end
-    o += 1
   end
 
-  # Next version above
-  return (nvi - 2)
-end
+  def match_new_features?(str)
+    str =~ /^### New features:/
+  end
+
+  def match_enhancements?(str)
+    str =~ /^### Enhancements:/
+  end
+
+  def match_bug_fixes?(str)
+    str =~ /^### Bug fixes:/
+  end
+
+  def match_security?(str)
+    str =~ /^### Security:/
+  end
+
+  def match_compatibility?(str)
+    str =~ /^### Compatibility:/
+  end
+
+  def match_deprecations?(str)
+    str =~ /^### Deprecations:/
+  end
 
 
+  def next_version_index(lns_array)
+    nvi = lns_array[3..].each_with_index {break _2 if _1.start_with?("## [") }
+    nvi += 3
+  end
 
-#
-# A meta function: do the real work other 6 functions delegate
-#
-# This function detect the main category, and then handle the
-# sub category.
-#
-def meta_add_to_a_category(log, main_category_order, category)
+  def next_category_index(lns_array)
+    nci = lns_array[3...nvi].each_with_index {break _2 if _1.start_with?("### ") }
 
-  content = get_changelog
-  lns = content.lines
-
-  match_unreleased_fail!(lns[2])
-
-  nvi = next_version_index(lns)
-  # To find the existing category line
-  main_cat_i = lns[0...nvi].each_with_index do
-    # Adjust to index of the order table
-    break _2 if send(MATCH_TABLE[main_category_order-1], _1)
+    # The not match return value is not nil!! But an array!!
+    if nci.is_a(Integer) then nci += 3
+    else nil end
   end
 
   #
-  # Always update to latest time when making a log
+  #  ### New features:
   #
-  # We must add a "\n" because every element of the array
-  #   is a sentence with a trailing newline, then they can
-  #   be 'joined' to a working long string
+  #  - xaaaaa
+  #  - xbbbbb
+  #  - xccccc    [-> this]
   #
-  lns[2] = UNRELEASED_TITLE + "\n"
+  def find_main_category_last_list_item_index(lns,
+                                              main_cat_index,
+                                              first_lower_order_category_index)
+    mci = main_cat_index
+    nci = first_lower_order_category_index
 
-  f_l_o_c_i = first_lower_order_category_index(lns, main_category_order)
+    list_i = lns[mci+2..nci].each_with_index do
+      break _2 if _1  !~  /^- .*/
+    end
+    list_i += mci+2 - 1
+  end
 
-  if main_cat_i.class != Integer
-  ################################################################################
-  # The main category not exists
-  ################################################################################
+
+  LIST__Feature = %w[
+    new_features
+    enhancements
+    bug_fixes
+    security
+    compatibility
+    deprecations
+  ]
+
+  # New features
+  # Enhancements
+  # Bug fixes
+  # Security
+  # Compatibility
+  # Deprecations
+  LIST__Main_Category = LIST__Feature.map do
+    _1.split('_').join(' ').capitalize
+  end
+
+  # match_new_features?
+  # match_enhancements?
+  # match_ ...
+  LIST__Match_Method = LIST__Feature.map do
+    ('match_' + _1 + '?').to_sym
+  end
+
+=begin
+  {
+    1 => :add_to_new_features,
+    2 => :add_to_enhancements,
+    ...
+  }
+=end
+  HASH__Order_To_AddTo_Method = ([1,2,3,4,5,6].zip LIST__Feature.map {|m| ('add_to_' + m).to_sym }).to_h
 
 
-    ########################################
-    if $sub_category
+  def first_lower_order_category_index(lns_array, category_order)
 
-    # Because the main category not exists,
-    #   nor does the sub category
+    o = category_order
+
+    nvi = next_version_index(lns_array)
+
+    while o < LIST__Match_Method.size
+      lns_array[0...nvi].each_with_index do
+        if send(LIST__Match_Method[o], _1)
+          return _2
+        end
+      end
+      o += 1
+    end
+
+    # Next version above
+    return (nvi - 2)
+  end
+
+
+
+  # A meta function: do the real work other 6 functions delegate
+  #
+  # This function detect the main category, and then handle the
+  # sub category.
+  def meta_add_to_a_category(log, main_category_order, category)
+
+    content = get_changelog
+    lns = content.lines
+
+    match_unreleased_fail!(lns[2])
+
+    nvi = next_version_index(lns)
+    # To find the existing category line
+    main_cat_i = lns[0...nvi].each_with_index do
+      # Adjust to index of the order table
+      break _2 if send(LIST__Match_Method[main_category_order-1], _1)
+    end
+
     #
-    sub_cat_i = f_l_o_c_i
-    to_wr = lns[0...sub_cat_i].join + "### #{category}:\n\n" + "**#{$sub_category}**\n\n" + '  - ' + log + "\n\n"
-    File.write($Changelog_file, to_wr + lns[sub_cat_i..].join)
+    # Always update to latest time when making a log
+    #
+    # We must add a "\n" because every element of the array
+    #   is a sentence with a trailing newline, then they can
+    #   be 'joined' to a working long string
+    #
+    lns[2] = UNRELEASED_TITLE + "\n"
 
-    puts "chlog: Add log to #{category}/#{$sub_category}"
-    return
-    end # end of if $sub_category
-    ########################################
+    f_l_o_c_i = first_lower_order_category_index(lns, main_category_order)
+
+    if main_cat_i.class != Integer
+    ################################################################################
+    # The main category not exists
+    ################################################################################
 
 
-    # situation: no sub category
+      ########################################
+      if @sub_category
 
-    # Not need adjust to the index of the order table
-    log_loc = f_l_o_c_i
-    puts "chlog: Add '#{category}' category"
-    to_wr = lns[0...(log_loc)].join + "### #{category}:\n\n" + '- ' + log + "\n"
-    File.write($Changelog_file, to_wr + lns[log_loc-1..].join)
+      # Because the main category not exists,
+      #   nor does the sub category
+      #
+      sub_cat_i = f_l_o_c_i
+      to_wr = lns[0...sub_cat_i].join + "### #{category}:\n\n" + "**#{@sub_category}**\n\n" + '  - ' + log + "\n\n"
+      File.write(@changelog, to_wr + lns[sub_cat_i..].join)
+
+      puts "chlog: Add log to #{category}/#{@sub_category}"
+      return
+      end # end of if @sub_category
+      ########################################
+
+      # situation: no sub category
+
+      # Not need adjust to the index of the order table
+      log_loc = f_l_o_c_i
+      puts "chlog: Add '#{category}' category"
+      to_wr = lns[0...(log_loc)].join + "### #{category}:\n\n" + '- ' + log + "\n"
+      File.write(@changelog, to_wr + lns[log_loc-1..].join)
 
   else
   ################################################################################
@@ -304,31 +279,31 @@ def meta_add_to_a_category(log, main_category_order, category)
 
 
     ########################################
-    if $sub_category
+    if @sub_category
 
     # from first list item to next main cat
     #   search if sub cat already exists
     sub_cat_i = lns[main_cat_i+2...f_l_o_c_i].each_with_index do
-      break _2 if _1 =~ /^\*\*#{$sub_category}\*\*/
+      break _2 if _1 =~ /^\*\*#{@sub_category}\*\*/
     end
 
     if !sub_cat_i.is_a?(Integer)
     # the sub category not exists
 
       sub_cat_i = 2 + find_main_category_last_list_item_index(lns,main_cat_i,f_l_o_c_i)
-      to_wr = lns[0...sub_cat_i].join + "**#{$sub_category}**\n\n" + '  - ' + log + "\n\n"
-      File.write($Changelog_file, to_wr + lns[sub_cat_i..].join)
+      to_wr = lns[0...sub_cat_i].join + "**#{@sub_category}**\n\n" + '  - ' + log + "\n\n"
+      File.write(@changelog, to_wr + lns[sub_cat_i..].join)
     else
     # the sub category exists
 
       sub_cat_i +=  main_cat_i+2
       to_wr = lns[0..sub_cat_i+1].join + '  - ' + log + "\n"
-      File.write($Changelog_file, to_wr + lns[sub_cat_i+2..].join)
+      File.write(@changelog, to_wr + lns[sub_cat_i+2..].join)
     end
 
-    puts "chlog: Add log to #{category}/#{$sub_category}"
+    puts "chlog: Add log to #{category}/#{@sub_category}"
     return
-    end # end of if $sub_category
+    end # end of if @sub_category
     ########################################
 
 
@@ -342,120 +317,100 @@ def meta_add_to_a_category(log, main_category_order, category)
     if lns[main_cat_i+2] =~ /\*\*.*/
       to_wr += "\n"
     end
-    File.write($Changelog_file, to_wr + lns[main_cat_i+2..].join)
+    File.write(@changelog, to_wr + lns[main_cat_i+2..].join)
   end
 
   puts "chlog: Add log to #{category}"
 end
 
 
-#
-# main category order: 1
-#
-def add_to_new_features(log)
-  meta_add_to_a_category(log, 1, "New features")
-end
 
-#
-# main category order: 2
-#
-def add_to_enhancements(log)
-  meta_add_to_a_category(log, 2, "Enhancements")
-end
-
-#
-# main_category_order: 3
-#
-def add_to_bug_fixes(log)
-  meta_add_to_a_category(log, 3, "Bug fixes")
-end
-
-#
-# main_category_order: 4
-#
-def add_to_security(log)
-  meta_add_to_a_category(log, 4, "Security")
-end
-
-#
-# main_category_order: 5
-#
-def add_to_compatibility(log)
-  meta_add_to_a_category(log, 5, "Compatibility")
-end
-
-#
-# The last of order table
-# main_category_order: 6
-#
-def add_to_deprecations(log)
-  meta_add_to_a_category(log, 6, "Deprecations")
-end
-
-
-#
-# Release a version
-#
-def release_new_version(ver)
-  if ver.nil?
-    puts "chlog: No version supplied! "
-    puts "       Use chlog -r <version>!",""
-    exit 1
+  # main category order: 1
+  def add_to_new_features
+    meta_add_to_a_category(@log, 1, "New features")
   end
 
-  if !ver.downcase.start_with?('v') and ver[0].match? /\d/
-    ver = 'v' + ver
+  # main category order: 2
+  def add_to_enhancements
+    meta_add_to_a_category(@log, 2, "Enhancements")
   end
 
-  content = get_changelog
-  lns = content.lines
+  # main_category_order: 3
+  def add_to_bug_fixes
+    meta_add_to_a_category(@log, 3, "Bug fixes")
+  end
 
-  match_unreleased_fail!(lns[2])
+  # main_category_order: 4
+  def add_to_security
+    meta_add_to_a_category(@log, 4, "Security")
+  end
 
-  header = <<EOF
+  # main_category_order: 5
+  def add_to_compatibility
+    meta_add_to_a_category(@log, 5, "Compatibility")
+  end
+
+  # The last of order table
+  # main_category_order: 6
+  def add_to_deprecations
+    meta_add_to_a_category(@log, 6, "Deprecations")
+  end
+
+  # Release a version
+  def release_new_version(ver)
+    if ver.nil?
+      puts "chlog: No version supplied!" || puts
+      abort "Use chlog -r <version>!"
+    end
+
+    if !ver.downcase.start_with?('v') and ver[0].match? /\d/
+      ver = 'v' + ver
+    end
+
+    content = get_changelog
+    lns = content.lines
+
+    match_unreleased_fail!(lns[2])
+
+    header = <<EOF
 # Changelog
 
-## [Unreleased](#) (#{TODAY})
+## [Unreleased](#) (#{Chlog::TODAY})
 
 <br>
 
 EOF
 
-  new_version = "## [#{ver}](#) (#{TODAY})\n"
-  new_cont = header + new_version + lns[3..].join('')
-  File.write($Changelog_file, new_cont)
-  puts "Release #{ver} in Changelog!"
-  log = "Release #{ver}"
-end
-
-
-#
-# Help user interactively
-#
-def ask_user_category
-  category = HL.choose do |menu|
-    menu.index_color  = :rgb_77bbff
-    menu.prompt = "What main category?"
-    # return number!!! not string!!!
-    menu.choices(*CATEGORY_TABLE)
+    new_version = "## [#{ver}](#) (#{Chlog::TODAY})\n"
+    new_cont = header + new_version + lns[3..].join('')
+    File.write(@changelog, new_cont)
+    puts "Release #{ver} in Changelog!"
+    log = "Release #{ver}"
   end
 
-  option = CATEGORY_TABLE.index(category)
 
-  if $sub_category.nil?
-    sub = HL.ask "What sub category? [NIL/sub]"
-    case sub
-    when ''
-      $sub_category = nil
-    else
-      $sub_category = sub
+  # Help user interactively
+  def ask_user_category
+    category = @highline.choose do |menu|
+      menu.index_color  = :rgb_77bbff
+      menu.prompt = "What main category?"
+      # return number!!! not string!!!
+      menu.choices(*LIST__Main_Category)
     end
+
+    option = LIST__Main_Category.index(category)
+
+    if @sub_category.nil?
+      sub = @highline.ask "What sub category? [NIL/sub]"
+      case sub
+      when '' then @sub_category = nil
+      else @sub_category = sub end
+    end
+    return option
   end
-  return option
-end
 
 
-def add_log_sensitive(log, with_commit_msg: true)
+  def add_log_sensitive(log, with_commit_msg: true)
 
   # Be careful the when statements order
   # Match the case you want first
@@ -472,17 +427,17 @@ def add_log_sensitive(log, with_commit_msg: true)
   end
 
 
-  main_category = CATEGORY_TABLE[option-1]
+  main_category = LIST__Main_Category[option-1]
   if main_category.nil?
     re = 'need ask user'
   else
-    re = HL.ask "Add to '#{main_category}'? [Y/n]"
+    re = @highline.ask "Add to '#{main_category}'? [Y/n]"
   end
   if re == '' || re.downcase == 'y' || re.downcase == 'yes'
-    send(METHOD_HASH_TABLE[option], log)
+    send(HASH__Order_To_AddTo_Method[option], log)
   else
     option = ask_user_category
-    send(METHOD_HASH_TABLE[option+1], log)
+    send(HASH__Order_To_AddTo_Method[option+1], log)
   end
 end
 
@@ -492,5 +447,5 @@ end
 #############
 #    main
 #############
-
-cli = Chlog::CliHandler.new $*
+Chlog::CliHandler.new $*
+exit(true)

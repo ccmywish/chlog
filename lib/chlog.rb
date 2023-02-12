@@ -11,8 +11,9 @@
 
 module Chlog
 
-  GEM_VERSION = "0.8.0"
+  GEM_VERSION = "1.8.0"
 
+  require 'date'
   TODAY = Date.today.to_s
 
   UNRELEASED_TITLE = "## [Unreleased](#) (#{TODAY})"
@@ -39,11 +40,30 @@ end
 
 class Chlog::Logger
 
-  HL = HighLine.new
+  attr_accessor :sub_category,  # 存储次标题
+                :log,           # 存储log
+                :highline       # HighLine 实例
+                :changelog      # CHANGELOG.md 位置
+
+
+  def initialize
+    require 'highline'
+    @highline = HighLine.new
+
+    require 'open3'
+    # Prevent current directory is not git directory
+    Open3.popen3("git rev-parse --show-toplevel") do |i, o, err, t|
+      if err.read.include?("fatal: not a git repository")
+        puts "chlog: Not a git directory!"  || exit(false)
+      else
+        @changelog = `git rev-parse --show-toplevel`.chomp + '/CHANGELOG.md'
+      end
+    end
+  end
 
 
   def get_changelog
-    file = $Changelog_file
+    file = @changelog
     if File.exists? file
       return File.read file
     else
@@ -54,12 +74,12 @@ class Chlog::Logger
 
 
   def generate_changelog
-    file = $Changelog_file
+    file = @changelog
     if File.exists? file
-      puts "chlog: Already exists Changelog (#$Changelog_file)"
+      puts "chlog: Already exists Changelog (#@changelog)"
     else
       File.write(file, Chlog::TEMPLATE)
-      puts "chlog: Generate #$Changelog_file OK!"
+      puts "chlog: Generate #@changelog OK!"
     end
   end
 

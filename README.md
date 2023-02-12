@@ -2,7 +2,7 @@
 
 # chlog
 
-[![Gem Version](https://badge.fury.io/rb/chlog.svg)](https://rubygems.org/gems/chlog) 
+[![Gem Version](https://badge.fury.io/rb/chlog.svg)](https://rubygems.org/gems/chlog)
 
 ```bash
 gem install chlog
@@ -16,7 +16,7 @@ Easily maintain Changelog on the cli.
 
 
 ## What a good Changelog looks like?
- 
+
 See what [a good Changelog](./A_GOOD_CHANGELOG.md) `chlog` can help to generate all through command line without your editing.
 
 See how `chlog` help to maintain [its own Changelog](./CHANGELOG.md).
@@ -35,40 +35,31 @@ See why you should [keep a changelog](https://github.com/olivierlacan/keep-a-cha
 
 ## Usage
 
-Notice: 
+Notice:
 1. You can always manually add/change info to your Changelog.
 2. The log's category order is keep.
 
 ```bash
-$ chlog
-# Generate CHANGELOG.md in your git root or do nothing if already exists
+chlog (v#{Chlog::GEM_VERSION}): Help maintain the Changelog of your projects
 
-$ chlog [--sub] log      
-# -> Auto determine main category(fallback Enhancements) (/ sub category) add log 
+Usage:
 
-$ chlog -g [-m] [--sub]
-# -> Reuse last commit log (m category / sub category)
+  chlog -g                Generate CHANGELOG.md in git root
+  chlog -r <3.14>         Release version to v3.14
 
-$ chlog -n [--sub] log
-# -> Add log to 'New features'/'sub categories' 
+Add log:
 
-$ chlog -e [--sub] log
-# -> Add log to 'Enhancements'/'sub categories' 
+  chlog <-main category> [--sub category] <log>
 
-$ chlog -b [--sub] log
-# -> Add log to 'Bug fixes'/'sub categories' 
+Main Category:
 
-$ chlog -s [--sub] log
-# -> Add log to 'Security'/'sub categories' 
+  -n    Add log to New features
+  -e    Add log to Enhancements
+  -b    Add log to Bug fixes
+  -s    Add log to Security
+  -c    Add log to Compatibility
+  -d    Add log to Deprecations
 
-$ chlog -c [--sub] log
-# -> Add log to 'Compatibility'/'sub categories' 
-
-$ chlog -d [--sub] log
-# -> Add log to 'Deprecations'/'sub categories' 
-
-$ chlog -r version
-# -> Release to version
 ```
 
 <br>

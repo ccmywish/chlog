@@ -51,28 +51,28 @@ class Chlog::CliHandler
 
 
   def help
-    puts <<EOH
-  chlog (v#{Chlog::GEM_VERSION}): Help maintain the Changelog of your projects
+    puts <<~EOH
+    chlog (v#{Chlog::GEM_VERSION}): Help maintain the Changelog of your projects
 
-  Usage:
+    Usage:
 
-    chlog -g                Generate CHANGELOG.md in git root
-    chlog -r <3.14>         Release version to v3.14
+      chlog -g                Generate CHANGELOG.md in git root
+      chlog -r <3.14>         Release version to v3.14
 
-  Add log:
+    Add log:
 
-    chlog <-main category> [--sub category] <log>
+      chlog <-main category> [--sub category] <log>
 
-  Main Category:
-    -n    Add log to New features
-    -e    Add log to Enhancements
-    -b    Add log to Bug fixes
-    -s    Add log to Security
-    -c    Add log to Compatibility
-    -d    Add log to Deprecations
+    Main Category:
 
-EOH
+      -n    Add log to New features
+      -e    Add log to Enhancements
+      -b    Add log to Bug fixes
+      -s    Add log to Security
+      -c    Add log to Compatibility
+      -d    Add log to Deprecations
 
+    EOH
   end
 
 end

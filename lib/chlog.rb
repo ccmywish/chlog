@@ -64,7 +64,7 @@ class Chlog::Logger
 
   def get_changelog
     file = @changelog
-    if File.exists? file
+    if File.exist? file
       return File.read file
     else
       puts "chlog: No Changelog exists, use 'chlog -g' to generate!"
@@ -75,7 +75,7 @@ class Chlog::Logger
 
   def generate_changelog
     file = @changelog
-    if File.exists? file
+    if File.exist? file
       puts "chlog: Already exists Changelog (#@changelog)"
     else
       File.write(file, Chlog::TEMPLATE)

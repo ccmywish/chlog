@@ -11,7 +11,7 @@
 
 module Chlog
 
-  GEM_VERSION = "1.8.0"
+  GEM_VERSION = "0.8.0"
 
   require 'date'
   TODAY = Date.today.to_s

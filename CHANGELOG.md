@@ -4,7 +4,7 @@
 
 <br>
 
-## [v1.7.3](#) (2022-11-29)
+## [v0.7.2](#) (2022-11-29)
 
 ### Enhancements:
 
@@ -12,7 +12,7 @@
 
 <br>
 
-## [v1.7.2](#) (2022-11-29)
+## [v0.7.1](#) (2022-11-29)
 
 ### Bug fixes:
 
@@ -20,7 +20,7 @@
 
 <br>
 
-## [v1.7.0](#) (2022-04-15)
+## [v0.7.0](#) (2022-04-15)
 
 ### Enhancements:
 
@@ -31,7 +31,7 @@
 
 <br>
 
-## [v1.6.1](#) (2022-04-09)
+## [v0.6.1](#) (2022-04-10)
 
 ### Bug fixes:
 
@@ -39,13 +39,15 @@
   ```ruby
   __FILE__
   # => .rbenv/versions/3.1.1/lib/ruby/gems/3.1.0/gems/chlog-1.6.1.alpha/bin/chlog
+  # 这个总是指向本文件所在地点
   $0
   # => .rbenv/versions/3.1.1/bin/chlog
+  # 这个总是指向第一个被Ruby执行的脚本
   ```
 
 <br>
 
-## [v1.6](#) (2022-04-09)
+## [v0.6.0](#) (2022-04-09)
 
 ### New features:
 
@@ -57,7 +59,7 @@
 
 <br>
 
-## [v1.5](#) (2022-04-06)
+## [v0.5.0](#) (2022-04-06)
 
 ### Enhancements:
 
@@ -65,7 +67,7 @@
 
 <br>
 
-## [v1.4](#) (2022-03-25)
+## [v0.4.0](#) (2022-03-25)
 
 ### New features:
 
@@ -85,7 +87,7 @@
 
 <br>
 
-## [v1.3](#) (2022-03-24)
+## [v0.3.1](#) (2022-03-24)
 
 ### Enhancements:
 
@@ -93,7 +95,7 @@
 
 <br>
 
-## [v1.2](#) (2022-03-21)
+## [v0.3.0](#) (2022-03-21)
 
 ### New features:
 
@@ -112,7 +114,7 @@
 
 <br>
 
-## [v1.1](#) (2022-03-19)
+## [v0.2.0](#) (2022-03-19)
 
 **Enhancements:**
 
@@ -124,7 +126,7 @@
 
 <br>
 
-## [v1.0](#) (2022-03-18)
+## [v0.1.0](#) (2022-03-18)
 
 **Enhancements:**
 
@@ -136,8 +138,8 @@
 
 ## [Initialize](#) (2022-03-18)
 
-  I write this program because I don't like the existing project [github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator). The code can't always be associated with Github, and issues links are really messy and not necessary if the project had failed and gone nowhere, but the code may still existed in someone's dir. 
-  
+  I write this program because I don't like the existing project [github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator). The code can't always be associated with Github, and issues links are really messy and not necessary if the project had failed and gone nowhere, but the code may still existed in someone's dir.
+
   So leaving the important change logs here in this file with code is good.
 
 <br>

@@ -13,28 +13,6 @@ module Chlog
 
   GEM_VERSION = "0.8.0"
 
-  require 'date'
-  TODAY = Date.today.to_s
-
-  UNRELEASED_TITLE = "## [Unreleased](#) (#{TODAY})"
-
-  TEMPLATE = <<EOT
-# Changelog
-
-#{UNRELEASED_TITLE}
-
-<br>
-
-## [Initialize](#) (#{TODAY})
-
-<br>
-
-<hr>
-
-This Changelog is maintained with [chlog](https://github.com/ccmywish/chlog)
-
-EOT
-
 end
 
 
@@ -61,6 +39,39 @@ class Chlog::Logger
     end
   end
 
+  require 'date'
+  TODAY = Date.today.to_s
+
+  UNRELEASED_TITLE = "## [Unreleased](#) (#{TODAY})"
+
+  TEMPLATE = <<~EOT
+    # Changelog
+
+    #{UNRELEASED_TITLE}
+
+    <br>
+
+    ## [Initialize](#) (#{TODAY})
+
+    <br>
+
+    <hr>
+
+    This Changelog is maintained with [chlog](https://github.com/ccmywish/chlog)
+
+  EOT
+
+
+  def generate_changelog
+    file = @changelog
+    if File.exist? file
+      puts "chlog: Already exists Changelog (#@changelog)" or return false
+    else
+      File.write(file, TEMPLATE)
+      puts "chlog: Generate #@changelog OK!" or return true
+    end
+  end
+
 
   def get_changelog
     file = @changelog
@@ -70,17 +81,5 @@ class Chlog::Logger
       abort "chlog: No Changelog exists, use 'chlog -g' to generate!"
     end
   end
-
-
-  def generate_changelog
-    file = @changelog
-    if File.exist? file
-      puts "chlog: Already exists Changelog (#@changelog)" or return false
-    else
-      File.write(file, Chlog::TEMPLATE)
-      puts "chlog: Generate #@changelog OK!" or return true
-    end
-  end
-
 
 end

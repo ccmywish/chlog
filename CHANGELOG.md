@@ -1,6 +1,19 @@
 # Changelog
 
-## [Unreleased](#) (2022-11-29)
+## [Unreleased](#) (2023-02-12)
+
+<br>
+
+## [v0.8.0](#) (2023-02-12)
+
+### Enhancements:
+
+- Huge refactor
+
+### Deprecations:
+
+- Remove feature: add log sensitively
+- Remove feature: auto git commit
 
 <br>
 

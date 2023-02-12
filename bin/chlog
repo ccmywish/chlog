@@ -378,16 +378,16 @@ end
 
     match_unreleased_fail!(lns[2])
 
-    header = <<EOF
-# Changelog
+    header = <<~EOF
+      # Changelog
 
-## [Unreleased](#) (#{Chlog::TODAY})
+      ## [Unreleased](#) (#{TODAY})
 
-<br>
+      <br>
 
-EOF
+    EOF
 
-    new_version = "## [#{ver}](#) (#{Chlog::TODAY})\n"
+    new_version = "## [#{ver}](#) (#{TODAY})\n"
     new_cont = header + new_version + lns[3..].join('')
     File.write(@changelog, new_cont)
     puts "chlog: Release #{ver} in Changelog!" or return true

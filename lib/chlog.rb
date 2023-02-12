@@ -54,7 +54,7 @@ class Chlog::Logger
     # Prevent current directory is not git directory
     Open3.popen3("git rev-parse --show-toplevel") do |i, o, err, t|
       if err.read.include?("fatal: not a git repository")
-        puts "chlog: Not a git directory!"  || exit(false)
+        puts "chlog: Not a git directory!" or exit(false)
       else
         @changelog = `git rev-parse --show-toplevel`.chomp + '/CHANGELOG.md'
       end
@@ -67,8 +67,7 @@ class Chlog::Logger
     if File.exist? file
       return File.read file
     else
-      puts "chlog: No Changelog exists, use 'chlog -g' to generate!"
-      exit
+      abort "chlog: No Changelog exists, use 'chlog -g' to generate!"
     end
   end
 
@@ -76,10 +75,10 @@ class Chlog::Logger
   def generate_changelog
     file = @changelog
     if File.exist? file
-      puts "chlog: Already exists Changelog (#@changelog)"
+      puts "chlog: Already exists Changelog (#@changelog)" or return false
     else
       File.write(file, Chlog::TEMPLATE)
-      puts "chlog: Generate #@changelog OK!"
+      puts "chlog: Generate #@changelog OK!" or return true
     end
   end
 

@@ -28,8 +28,8 @@ class Chlog::CliHandler
     logger = Chlog::Logger.new
 
     case action
-    when "-g" then logger.generate_changelog()
-    when "-r" then logger.release_new_version(args[1])
+    when "-g" then exit logger.generate_changelog
+    when "-r" then exit logger.release_new_version(args[1])
     end
 
     if args[1] =~ /^--(.*)/
@@ -390,8 +390,7 @@ EOF
     new_version = "## [#{ver}](#) (#{Chlog::TODAY})\n"
     new_cont = header + new_version + lns[3..].join('')
     File.write(@changelog, new_cont)
-    puts "Release #{ver} in Changelog!"
-    log = "Release #{ver}"
+    puts "chlog: Release #{ver} in Changelog!" or return true
   end
 
 

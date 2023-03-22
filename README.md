@@ -4,16 +4,17 @@
 
 [![Gem Version](https://badge.fury.io/rb/chlog.svg)](https://rubygems.org/gems/chlog)
 
-```bash
-gem install chlog
-```
-
 Easily maintain Changelog on the cli.
-
-<br>
 
 </div>
 
+## Install
+
+```bash
+$ gem install chlog
+```
+
+<br>
 
 ## What a good Changelog looks like?
 
@@ -23,7 +24,6 @@ See how `chlog` help to maintain [its own Changelog](./CHANGELOG.md).
 
 <br>
 
-
 ## Why?
 
 See why I made this project rather than use existing tool from [CHANGELOG.md](./CHANGELOG.md) `Initialize` part.
@@ -32,7 +32,6 @@ See why you should [keep a changelog](https://github.com/olivierlacan/keep-a-cha
 
 <br>
 
-
 ## Usage
 
 Notice:
@@ -40,7 +39,7 @@ Notice:
 2. The log's category order is keep.
 
 ```bash
-chlog (v#{Chlog::GEM_VERSION}): Help maintain the Changelog of your projects
+chlog: Help maintain the Changelog of your projects
 
 Usage:
 

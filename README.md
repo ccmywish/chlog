@@ -18,7 +18,7 @@ $ gem install chlog
 
 ## What a good Changelog looks like?
 
-See what [a good Changelog](./A_GOOD_CHANGELOG.md) `chlog` can help to generate all through command line without your editing.
+See what [a good Changelog](./doc/A_GOOD_CHANGELOG.md) `chlog` can help to generate all through command line without your editing.
 
 See how `chlog` help to maintain [its own Changelog](./CHANGELOG.md).
 

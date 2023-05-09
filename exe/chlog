@@ -58,8 +58,8 @@ module Chlog::CLI
 
     Usage:
 
-      chlog -g                Generate CHANGELOG.md in git root
-      chlog -r <3.14>         Release version to v3.14
+      chlog -g               Generate CHANGELOG.md in git root
+      chlog -r <3.14>        Release version to v3.14
 
     Add log:
 

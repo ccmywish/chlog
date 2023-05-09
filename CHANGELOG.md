@@ -1,6 +1,14 @@
 # Changelog
 
-## [Unreleased](#) (2023-02-12)
+## [Unreleased](#) (2023-05-09)
+
+<br>
+
+## [v0.9.0](#) (2023-05-09)
+
+### Enhancements:
+
+- Refactor lib structure
 
 <br>
 

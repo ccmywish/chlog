@@ -11,6 +11,6 @@
 
 module Chlog
 
-  GEM_VERSION = "0.8.1"
+  GEM_VERSION = "0.9.0"
 
 end

@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 # ------------------------------------------------------
 # File          : chlog.rb
-# Authors       : ccmywish <ccmywish@qq.com>
+# Authors       : Aoran Zeng <ccmywish@qq.com>
 # Created on    : <2022-03-18>
-# Last modified : <2023-02-12>
+# Last modified : <2023-05-09>
 #
 # chlog:
 #
@@ -12,9 +12,11 @@
 
 require 'chlog'
 
-class Chlog::CliHandler
+module Chlog::CLI
 
-  def initialize(args)
+  def self.run
+
+    args = $*.dup
 
     if args.size == 0
       help or exit
@@ -50,7 +52,7 @@ class Chlog::CliHandler
   end
 
 
-  def help
+  def self.help
     puts <<~EOH
     chlog (v#{Chlog::GEM_VERSION}): Help maintain the Changelog of your projects
 
@@ -415,8 +417,4 @@ end
 
 end
 
-#############
-#    main
-#############
-Chlog::CliHandler.new $*
-exit(true)
+Chlog::CLI.run

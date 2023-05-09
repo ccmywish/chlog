@@ -1,5 +1,5 @@
 require 'date'
-require_relative 'lib/chlog'
+require_relative 'lib/chlog/version'
 
 Gem::Specification.new do |s|
   s.name    = "chlog"
@@ -12,11 +12,12 @@ This command line tool `chlog` helps generate and maintain the Changelog of your
 DESC
 
   s.license  = "MIT"
-  s.authors  = "ccmywish"
+  s.authors  = "Aoran Zeng"
   s.email    = "ccmywish@qq.com"
   s.homepage = "https://github.com/ccmywish/chlog"
 
-  s.files = ["lib/chlog.rb"]
+  s.files = ['lib/chlog.rb', 'lib/chlog/version.rb']
+  s.bindir = 'exe'
   s.executables = ['chlog']
   s.require_paths = ['lib']
 

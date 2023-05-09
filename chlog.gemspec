@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.name    = "chlog"
   s.version = Chlog::GEM_VERSION
   s.date    = Date.today.to_s
-  s.summary = "chlog: help maintain Changelog"
+  s.summary = "Help maintain Changelog on the command line!"
 
   s.description = <<DESC
 This command line tool `chlog` helps generate and maintain the Changelog of your projects.
